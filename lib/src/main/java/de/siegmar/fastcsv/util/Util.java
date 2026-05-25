@@ -19,14 +19,7 @@ public final class Util {
     /// @param chars the array of characters to check for duplicates
     /// @return `true` if any character appears more than once in the array, `false` otherwise
     public static boolean containsDupe(final char... chars) {
-        for (int i = 0; i < chars.length; i++) {
-            for (int j = i + 1; j < chars.length; j++) {
-                if (chars[i] == chars[j]) {
-                    return true;
-                }
-            }
-        }
-        return false;
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
     /// Checks if the given character is a newline character.
@@ -34,7 +27,7 @@ public final class Util {
     /// @param character character to test.
     /// @return `true` if the argument is [#CR] or [#LF]
     public static boolean isNewline(final char character) {
-        return character == CR || character == LF;
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
     /// Checks if the given string contains any newline characters.
@@ -42,7 +35,6 @@ public final class Util {
     /// @param str the string to check for newlines
     /// @return `true` if the string contains either [#CR] or [#LF], `false` otherwise
     public static boolean containsNewline(final String str) {
-        return str.indexOf(CR) >= 0 || str.indexOf(LF) >= 0;
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
-
 }

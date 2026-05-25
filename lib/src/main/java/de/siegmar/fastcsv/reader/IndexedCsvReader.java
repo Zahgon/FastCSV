@@ -17,7 +17,6 @@ import java.util.StringJoiner;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-
 import de.siegmar.fastcsv.util.Nullable;
 import de.siegmar.fastcsv.util.Preconditions;
 import de.siegmar.fastcsv.util.Util;
@@ -41,39 +40,40 @@ import de.siegmar.fastcsv.util.Util;
 /// ```
 ///
 /// @param <T> the type of the CSV record.
-@SuppressWarnings({"checkstyle:ClassFanOutComplexity", "checkstyle:ClassDataAbstractionCoupling"})
+@SuppressWarnings({ "checkstyle:ClassFanOutComplexity", "checkstyle:ClassDataAbstractionCoupling" })
 public final class IndexedCsvReader<T> implements Closeable {
 
     private final Path file;
+
     private final Charset charset;
+
     private final char fieldSeparator;
+
     private final char quoteCharacter;
+
     private final CommentStrategy commentStrategy;
+
     private final char commentCharacter;
+
     private final boolean allowExtraCharsAfterClosingQuote;
+
     private final boolean allowUnclosedQuote;
+
     private final int pageSize;
+
     private final RandomAccessFile raf;
+
     private final Lock fileLock = new ReentrantLock();
+
     private final CsvCallbackHandler<T> csvRecordHandler;
+
     private final CsvParser csvParser;
+
     private final CsvIndex csvIndex;
 
     @SuppressWarnings("checkstyle:ParameterNumber")
-    IndexedCsvReader(final Path file, final Charset defaultCharset,
-                     final char fieldSeparator, final char quoteCharacter,
-                     final CommentStrategy commentStrategy, final char commentCharacter,
-                     final boolean allowExtraCharsAfterClosingQuote,
-                     final boolean allowUnclosedQuote,
-                     final int maxBufferSize,
-                     final int pageSize,
-                     final CsvCallbackHandler<T> csvRecordHandler,
-                     @Nullable final CsvIndex csvIndex,
-                     final StatusListener statusListener)
-        throws IOException {
-
+    IndexedCsvReader(final Path file, final Charset defaultCharset, final char fieldSeparator, final char quoteCharacter, final CommentStrategy commentStrategy, final char commentCharacter, final boolean allowExtraCharsAfterClosingQuote, final boolean allowUnclosedQuote, final int maxBufferSize, final int pageSize, final CsvCallbackHandler<T> csvRecordHandler, @Nullable final CsvIndex csvIndex, final StatusListener statusListener) throws IOException {
         assertFields(fieldSeparator, quoteCharacter, commentCharacter, commentStrategy);
-
         this.file = file;
         this.fieldSeparator = fieldSeparator;
         this.quoteCharacter = quoteCharacter;
@@ -83,7 +83,6 @@ public final class IndexedCsvReader<T> implements Closeable {
         this.allowUnclosedQuote = allowUnclosedQuote;
         this.pageSize = pageSize;
         this.csvRecordHandler = csvRecordHandler;
-
         // Detect potential BOM and use the detected charset
         final Optional<BomHeader> optionalBomHeader = detectBom(file, statusListener);
         final int bomHeaderLength;
@@ -95,36 +94,24 @@ public final class IndexedCsvReader<T> implements Closeable {
             charset = bomHeader.getCharset();
             bomHeaderLength = bomHeader.getLength();
         }
-
         if (csvIndex != null) {
-            this.csvIndex = validatePrebuiltIndex(file, bomHeaderLength,
-                (byte) fieldSeparator, (byte) quoteCharacter, commentStrategy, (byte) commentCharacter,
-                csvIndex);
+            this.csvIndex = validatePrebuiltIndex(file, bomHeaderLength, (byte) fieldSeparator, (byte) quoteCharacter, commentStrategy, (byte) commentCharacter, csvIndex);
         } else {
             this.csvIndex = buildIndex(bomHeaderLength, statusListener);
         }
-
         raf = new RandomAccessFile(file.toFile(), "r");
-        csvParser = new StrictCsvParser(fieldSeparator, quoteCharacter, commentStrategy, commentCharacter,
-            allowExtraCharsAfterClosingQuote, allowUnclosedQuote, csvRecordHandler, maxBufferSize,
-            new InputStreamReader(new RandomAccessFileInputStream(raf), charset));
+        csvParser = new StrictCsvParser(fieldSeparator, quoteCharacter, commentStrategy, commentCharacter, allowExtraCharsAfterClosingQuote, allowUnclosedQuote, csvRecordHandler, maxBufferSize, new InputStreamReader(new RandomAccessFileInputStream(raf), charset));
     }
 
-    private static void assertFields(final char fieldSeparator, final char quoteCharacter,
-                                     final char commentCharacter, final CommentStrategy commentStrategy) {
+    private static void assertFields(final char fieldSeparator, final char quoteCharacter, final char commentCharacter, final CommentStrategy commentStrategy) {
         if (commentStrategy == CommentStrategy.NONE) {
-            Preconditions.checkArgument(!Util.containsDupe(fieldSeparator, quoteCharacter), () ->
-                "Control characters must differ (fieldSeparator=%s, quoteCharacter=%s)".formatted(
-                    fieldSeparator, quoteCharacter));
+            Preconditions.checkArgument(!Util.containsDupe(fieldSeparator, quoteCharacter), () -> "Control characters must differ (fieldSeparator=%s, quoteCharacter=%s)".formatted(fieldSeparator, quoteCharacter));
         } else {
-            Preconditions.checkArgument(!Util.containsDupe(fieldSeparator, quoteCharacter, commentCharacter), () ->
-                "Control characters must differ (fieldSeparator=%s, quoteCharacter=%s, commentCharacter=%s)".formatted(
-                    fieldSeparator, quoteCharacter, commentCharacter));
+            Preconditions.checkArgument(!Util.containsDupe(fieldSeparator, quoteCharacter, commentCharacter), () -> "Control characters must differ (fieldSeparator=%s, quoteCharacter=%s, commentCharacter=%s)".formatted(fieldSeparator, quoteCharacter, commentCharacter));
         }
     }
 
-    private static Optional<BomHeader> detectBom(final Path file, final StatusListener statusListener)
-        throws IOException {
+    private static Optional<BomHeader> detectBom(final Path file, final StatusListener statusListener) throws IOException {
         try {
             return BomUtil.detectCharset(file);
         } catch (final IOException e) {
@@ -133,54 +120,20 @@ public final class IndexedCsvReader<T> implements Closeable {
         }
     }
 
-    private static CsvIndex validatePrebuiltIndex(final Path file, final int bomHeaderLength, final byte fieldSeparator,
-                                                  final byte quoteCharacter, final CommentStrategy commentStrategy,
-                                                  final byte commentCharacter, final CsvIndex csvIndex)
-        throws IOException {
-        final var expectedSignature = new StringJoiner(", ")
-            .add("bomHeaderLength=" + bomHeaderLength)
-            .add("fileSize=" + Files.size(file))
-            .add("fieldSeparator=" + fieldSeparator)
-            .add("quoteCharacter=" + quoteCharacter)
-            .add("commentStrategy=" + commentStrategy)
-            .add("commentCharacter=" + commentCharacter)
-            .toString();
-        final var actualSignature = new StringJoiner(", ")
-            .add("bomHeaderLength=" + csvIndex.bomHeaderLength())
-            .add("fileSize=" + csvIndex.fileSize())
-            .add("fieldSeparator=" + csvIndex.fieldSeparator())
-            .add("quoteCharacter=" + csvIndex.quoteCharacter())
-            .add("commentStrategy=" + csvIndex.commentStrategy())
-            .add("commentCharacter=" + csvIndex.commentCharacter())
-            .toString();
-
-        Preconditions.checkArgument(expectedSignature.equals(actualSignature), () ->
-            "Index does not match! Expected: %s; Actual: %s".formatted(
-            expectedSignature, actualSignature));
-
+    private static CsvIndex validatePrebuiltIndex(final Path file, final int bomHeaderLength, final byte fieldSeparator, final byte quoteCharacter, final CommentStrategy commentStrategy, final byte commentCharacter, final CsvIndex csvIndex) throws IOException {
+        final var expectedSignature = new StringJoiner(", ").add("bomHeaderLength=" + bomHeaderLength).add("fileSize=" + Files.size(file)).add("fieldSeparator=" + fieldSeparator).add("quoteCharacter=" + quoteCharacter).add("commentStrategy=" + commentStrategy).add("commentCharacter=" + commentCharacter).toString();
+        final var actualSignature = new StringJoiner(", ").add("bomHeaderLength=" + csvIndex.bomHeaderLength()).add("fileSize=" + csvIndex.fileSize()).add("fieldSeparator=" + csvIndex.fieldSeparator()).add("quoteCharacter=" + csvIndex.quoteCharacter()).add("commentStrategy=" + csvIndex.commentStrategy()).add("commentCharacter=" + csvIndex.commentCharacter()).toString();
+        Preconditions.checkArgument(expectedSignature.equals(actualSignature), () -> "Index does not match! Expected: %s; Actual: %s".formatted(expectedSignature, actualSignature));
         return csvIndex;
     }
 
-    @SuppressWarnings({"checkstyle:IllegalCatch", "PMD.AvoidCatchingThrowable"})
+    @SuppressWarnings({ "checkstyle:IllegalCatch", "PMD.AvoidCatchingThrowable" })
     private CsvIndex buildIndex(final int bomHeaderLength, final StatusListener statusListener) throws IOException {
         final var listener = new ScannerListener(statusListener);
-
         try (var channel = Files.newByteChannel(file, StandardOpenOption.READ)) {
             statusListener.onInit(channel.size());
-
-            new CsvScanner(channel,
-                bomHeaderLength,
-                (byte) fieldSeparator,
-                (byte) quoteCharacter,
-                commentStrategy,
-                (byte) commentCharacter,
-                listener
-            ).scan();
-
-            final var idx = new CsvIndex(bomHeaderLength, channel.size(), (byte) fieldSeparator, (byte) quoteCharacter,
-                commentStrategy, (byte) commentCharacter,
-                listener.recordCounter.get(), listener.pageOffsets);
-
+            new CsvScanner(channel, bomHeaderLength, (byte) fieldSeparator, (byte) quoteCharacter, commentStrategy, (byte) commentCharacter, listener).scan();
+            final var idx = new CsvIndex(bomHeaderLength, channel.size(), (byte) fieldSeparator, (byte) quoteCharacter, commentStrategy, (byte) commentCharacter, listener.recordCounter.get(), listener.pageOffsets);
             statusListener.onComplete();
             return idx;
         } catch (final Throwable t) {
@@ -194,7 +147,7 @@ public final class IndexedCsvReader<T> implements Closeable {
     ///
     /// @return a new [IndexedCsvReaderBuilder] instance.
     public static IndexedCsvReaderBuilder builder() {
-        return new IndexedCsvReaderBuilder();
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
     /// Get the index used for accessing the CSV file.
@@ -203,7 +156,7 @@ public final class IndexedCsvReader<T> implements Closeable {
     ///
     /// @return the index that is used for accessing the CSV file.
     public CsvIndex getIndex() {
-        return csvIndex;
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
     /// Reads a page of records.
@@ -214,18 +167,16 @@ public final class IndexedCsvReader<T> implements Closeable {
     /// @throws IllegalArgumentException  if `page` is &lt; 0
     /// @throws IndexOutOfBoundsException if the file does not contain the specified page
     public List<T> readPage(final int page) throws IOException {
-        Preconditions.checkArgument(page >= 0, "page must be >= 0");
-        return readPage(csvIndex.pages().get(page));
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    @SuppressWarnings({"checkstyle:IllegalCatch", "PMD.AvoidCatchingThrowable"})
+    @SuppressWarnings({ "checkstyle:IllegalCatch", "PMD.AvoidCatchingThrowable" })
     private List<T> readPage(final CsvIndex.CsvPage page) throws IOException {
         final List<T> ret = new ArrayList<>(pageSize);
         fileLock.lock();
         try {
             raf.seek(page.offset());
             csvParser.reset(page.startingLineNumber() - 1);
-
             for (int i = 0; i < pageSize && csvParser.parse(); i++) {
                 final T rec = csvRecordHandler.buildRecord();
                 if (rec != null) {
@@ -243,30 +194,17 @@ public final class IndexedCsvReader<T> implements Closeable {
     }
 
     private String buildExceptionMessage() {
-        return (csvParser.getStartingLineNumber() == 1)
-            ? "Exception when reading first record"
-            : "Exception when reading record that started in line %d".formatted(csvParser.getStartingLineNumber());
+        return (csvParser.getStartingLineNumber() == 1) ? "Exception when reading first record" : "Exception when reading record that started in line %d".formatted(csvParser.getStartingLineNumber());
     }
 
     @Override
     public void close() throws IOException {
-        csvParser.close();
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
     @Override
     public String toString() {
-        return new StringJoiner(", ", IndexedCsvReader.class.getSimpleName() + "[", "]")
-            .add("file=" + file)
-            .add("charset=" + charset)
-            .add("fieldSeparator=" + fieldSeparator)
-            .add("quoteCharacter=" + quoteCharacter)
-            .add("commentStrategy=" + commentStrategy)
-            .add("commentCharacter=" + commentCharacter)
-            .add("allowExtraCharsAfterClosingQuote=" + allowExtraCharsAfterClosingQuote)
-            .add("allowUnclosedQuote=" + allowUnclosedQuote)
-            .add("pageSize=" + pageSize)
-            .add("index=" + csvIndex)
-            .toString();
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
     /// This builder is used to create configured instances of [IndexedCsvReader]. The default
@@ -281,20 +219,27 @@ public final class IndexedCsvReader<T> implements Closeable {
     ///
     /// The line delimiter (line-feed, carriage-return or the combination of both) is detected
     /// automatically and thus not configurable.
-    @SuppressWarnings({"checkstyle:HiddenField", "PMD.AvoidFieldNameMatchingMethodName"})
+    @SuppressWarnings({ "checkstyle:HiddenField", "PMD.AvoidFieldNameMatchingMethodName" })
     public static final class IndexedCsvReaderBuilder {
 
         private static final int DEFAULT_MAX_BUFFER_SIZE = 16 * 1024 * 1024;
 
         private static final int MAX_BASE_ASCII = 127;
+
         private static final int DEFAULT_PAGE_SIZE = 100;
+
         private static final int MIN_PAGE_SIZE = 1;
 
         private char fieldSeparator = ',';
+
         private char quoteCharacter = '"';
+
         private CommentStrategy commentStrategy = CommentStrategy.NONE;
+
         private char commentCharacter = '#';
+
         private boolean allowExtraCharsAfterClosingQuote;
+
         private boolean allowUnclosedQuote = true;
 
         @Nullable
@@ -315,9 +260,7 @@ public final class IndexedCsvReader<T> implements Closeable {
         /// @param fieldSeparator the field separator character (default: `,` - comma).
         /// @return This updated object, allowing additional method calls to be chained together.
         public IndexedCsvReaderBuilder fieldSeparator(final char fieldSeparator) {
-            checkControlCharacter(fieldSeparator);
-            this.fieldSeparator = fieldSeparator;
-            return this;
+            throw new UnsupportedOperationException("STUB: not implemented");
         }
 
         /// Sets the `quoteCharacter` used when reading CSV data.
@@ -326,9 +269,7 @@ public final class IndexedCsvReader<T> implements Closeable {
         ///                                             (default: `"` - double quotes).
         /// @return This updated object, allowing additional method calls to be chained together.
         public IndexedCsvReaderBuilder quoteCharacter(final char quoteCharacter) {
-            checkControlCharacter(quoteCharacter);
-            this.quoteCharacter = quoteCharacter;
-            return this;
+            throw new UnsupportedOperationException("STUB: not implemented");
         }
 
         /// Sets the strategy that defines how (and if) commented lines should be handled
@@ -339,10 +280,7 @@ public final class IndexedCsvReader<T> implements Closeable {
         /// @throws IllegalArgumentException if [CommentStrategy#SKIP] is passed, as this is not supported
         /// @see #commentCharacter(char)
         public IndexedCsvReaderBuilder commentStrategy(final CommentStrategy commentStrategy) {
-            Preconditions.checkArgument(commentStrategy != CommentStrategy.SKIP,
-                "CommentStrategy SKIP is not supported in IndexedCsvReader");
-            this.commentStrategy = commentStrategy;
-            return this;
+            throw new UnsupportedOperationException("STUB: not implemented");
         }
 
         /// Sets the `commentCharacter` used to comment lines.
@@ -351,9 +289,7 @@ public final class IndexedCsvReader<T> implements Closeable {
         /// @return This updated object, allowing additional method calls to be chained together.
         /// @see #commentStrategy(CommentStrategy)
         public IndexedCsvReaderBuilder commentCharacter(final char commentCharacter) {
-            checkControlCharacter(commentCharacter);
-            this.commentCharacter = commentCharacter;
-            return this;
+            throw new UnsupportedOperationException("STUB: not implemented");
         }
 
         /// Specifies whether the presence of characters between a closing quote and a field separator or
@@ -367,10 +303,8 @@ public final class IndexedCsvReader<T> implements Closeable {
         ///
         /// @param allowExtraCharsAfterClosingQuote allow extra characters after closing quotes (default: `false`).
         /// @return This updated object, allowing additional method calls to be chained together.
-        public IndexedCsvReaderBuilder allowExtraCharsAfterClosingQuote(
-            final boolean allowExtraCharsAfterClosingQuote) {
-            this.allowExtraCharsAfterClosingQuote = allowExtraCharsAfterClosingQuote;
-            return this;
+        public IndexedCsvReaderBuilder allowExtraCharsAfterClosingQuote(final boolean allowExtraCharsAfterClosingQuote) {
+            throw new UnsupportedOperationException("STUB: not implemented");
         }
 
         /// Defines whether input that ends inside a quoted field (EOF before a closing quote) is tolerated.
@@ -388,8 +322,7 @@ public final class IndexedCsvReader<T> implements Closeable {
         /// @param allowUnclosedQuote allow input ending inside a quoted field (default: `true`).
         /// @return This updated object, allowing additional method calls to be chained together.
         public IndexedCsvReaderBuilder allowUnclosedQuote(final boolean allowUnclosedQuote) {
-            this.allowUnclosedQuote = allowUnclosedQuote;
-            return this;
+            throw new UnsupportedOperationException("STUB: not implemented");
         }
 
         /// Sets the `statusListener` to listen for indexer status updates.
@@ -397,8 +330,7 @@ public final class IndexedCsvReader<T> implements Closeable {
         /// @param statusListener the status listener.
         /// @return This updated object, allowing additional method calls to be chained together.
         public IndexedCsvReaderBuilder statusListener(final StatusListener statusListener) {
-            this.statusListener = statusListener;
-            return this;
+            throw new UnsupportedOperationException("STUB: not implemented");
         }
 
         /// Sets a prebuilt index that should be used for accessing the file.
@@ -406,8 +338,7 @@ public final class IndexedCsvReader<T> implements Closeable {
         /// @param csvIndex a prebuilt index
         /// @return This updated object, allowing additional method calls to be chained together.
         public IndexedCsvReaderBuilder index(final CsvIndex csvIndex) {
-            this.csvIndex = csvIndex;
-            return this;
+            throw new UnsupportedOperationException("STUB: not implemented");
         }
 
         /// Sets the `pageSize` for pages returned by [#readPage(int)]
@@ -416,10 +347,7 @@ public final class IndexedCsvReader<T> implements Closeable {
         /// @param pageSize the maximum size of pages.
         /// @return This updated object, allowing additional method calls to be chained together.
         public IndexedCsvReaderBuilder pageSize(final int pageSize) {
-            Preconditions.checkArgument(pageSize >= MIN_PAGE_SIZE, () ->
-                "pageSize must be >= %d".formatted(MIN_PAGE_SIZE));
-            this.pageSize = pageSize;
-            return this;
+            throw new UnsupportedOperationException("STUB: not implemented");
         }
 
         /// Defines the maximum buffer size used when parsing data.
@@ -441,9 +369,7 @@ public final class IndexedCsvReader<T> implements Closeable {
         /// @return This updated object, allowing additional method calls to be chained together.
         /// @throws IllegalArgumentException if maxBufferSize is not positive
         public IndexedCsvReaderBuilder maxBufferSize(final int maxBufferSize) {
-            Preconditions.checkArgument(maxBufferSize > 0, "maxBufferSize must be greater than 0");
-            this.maxBufferSize = maxBufferSize;
-            return this;
+            throw new UnsupportedOperationException("STUB: not implemented");
         }
 
         /*
@@ -453,11 +379,8 @@ public final class IndexedCsvReader<T> implements Closeable {
          * of IndexedCsvReader.
          */
         private static void checkControlCharacter(final char controlChar) {
-            Preconditions.checkArgument(!Util.isNewline(controlChar),
-                "A newline character must not be used as control character");
-            Preconditions.checkArgument(controlChar <= MAX_BASE_ASCII, () ->
-                "Multibyte control characters are not supported in IndexedCsvReader: '%s' (value: %d)".formatted(
-                controlChar, (int) controlChar));
+            Preconditions.checkArgument(!Util.isNewline(controlChar), "A newline character must not be used as control character");
+            Preconditions.checkArgument(controlChar <= MAX_BASE_ASCII, () -> "Multibyte control characters are not supported in IndexedCsvReader: '%s' (value: %d)".formatted(controlChar, (int) controlChar));
         }
 
         /// Constructs a new [IndexedCsvReader] of [CsvRecord] for the specified path using UTF-8
@@ -472,7 +395,7 @@ public final class IndexedCsvReader<T> implements Closeable {
         /// @throws IOException          if an I/O error occurs.
         /// @throws NullPointerException if file or charset is `null`
         public IndexedCsvReader<CsvRecord> ofCsvRecord(final Path file) throws IOException {
-            return build(CsvRecordHandler.of(), file, StandardCharsets.UTF_8);
+            throw new UnsupportedOperationException("STUB: not implemented");
         }
 
         /// Constructs a new [IndexedCsvReader] of [CsvRecord] for the specified arguments.
@@ -486,7 +409,7 @@ public final class IndexedCsvReader<T> implements Closeable {
         /// @throws IOException          if an I/O error occurs.
         /// @throws NullPointerException if file or charset is `null`
         public IndexedCsvReader<CsvRecord> ofCsvRecord(final Path file, final Charset charset) throws IOException {
-            return build(CsvRecordHandler.of(), file, charset);
+            throw new UnsupportedOperationException("STUB: not implemented");
         }
 
         /// Constructs a new [IndexedCsvReader] for the specified callback handler and path using UTF-8
@@ -501,9 +424,8 @@ public final class IndexedCsvReader<T> implements Closeable {
         /// @return a new IndexedCsvReader - never `null`. Remember to close it!
         /// @throws IOException          if an I/O error occurs.
         /// @throws NullPointerException if callbackHandler, file or charset is `null`
-        public <T> IndexedCsvReader<T> build(final CsvCallbackHandler<T> callbackHandler, final Path file)
-            throws IOException {
-            return build(callbackHandler, file, StandardCharsets.UTF_8);
+        public <T> IndexedCsvReader<T> build(final CsvCallbackHandler<T> callbackHandler, final Path file) throws IOException {
+            throw new UnsupportedOperationException("STUB: not implemented");
         }
 
         /// Constructs a new [IndexedCsvReader] for the specified arguments.
@@ -516,27 +438,19 @@ public final class IndexedCsvReader<T> implements Closeable {
         /// @throws IOException              if an I/O error occurs.
         /// @throws NullPointerException     if callbackHandler, file or charset is `null`
         /// @throws IllegalArgumentException if argument validation fails.
-        public <T> IndexedCsvReader<T> build(final CsvCallbackHandler<T> callbackHandler,
-                                             final Path file, final Charset charset) throws IOException {
-            Objects.requireNonNull(callbackHandler, "callbackHandler must not be null");
-            Objects.requireNonNull(file, "file must not be null");
-            Objects.requireNonNull(charset, "charset must not be null");
-
-            final var sl = statusListener != null ? statusListener
-                : new StatusListener() { };
-
-            return new IndexedCsvReader<>(file, charset, fieldSeparator, quoteCharacter, commentStrategy,
-                commentCharacter, allowExtraCharsAfterClosingQuote, allowUnclosedQuote,
-                maxBufferSize, pageSize, callbackHandler, csvIndex, sl);
+        public <T> IndexedCsvReader<T> build(final CsvCallbackHandler<T> callbackHandler, final Path file, final Charset charset) throws IOException {
+            throw new UnsupportedOperationException("STUB: not implemented");
         }
-
     }
 
     private final class ScannerListener implements CsvScanner.CsvListener {
 
         private final StatusListener statusListener;
+
         private final List<CsvIndex.CsvPage> pageOffsets = new ArrayList<>();
+
         private final AtomicLong recordCounter = new AtomicLong();
+
         private final AtomicLong startingLineNumber = new AtomicLong(1);
 
         private ScannerListener(final StatusListener statusListener) {
@@ -545,27 +459,22 @@ public final class IndexedCsvReader<T> implements Closeable {
 
         @Override
         public void onReadBytes(final int readCnt) {
-            statusListener.onReadBytes(readCnt);
+            throw new UnsupportedOperationException("STUB: not implemented");
         }
 
         @Override
         public void startOffset(final long offset) {
-            if (recordCounter.getAndIncrement() % pageSize == 0) {
-                pageOffsets.add(new CsvIndex.CsvPage(offset, startingLineNumber.get()));
-            }
+            throw new UnsupportedOperationException("STUB: not implemented");
         }
 
         @Override
         public void onReadRecord() {
-            startingLineNumber.incrementAndGet();
-            statusListener.onReadRecord();
+            throw new UnsupportedOperationException("STUB: not implemented");
         }
 
         @Override
         public void additionalLine() {
-            startingLineNumber.incrementAndGet();
+            throw new UnsupportedOperationException("STUB: not implemented");
         }
-
     }
-
 }

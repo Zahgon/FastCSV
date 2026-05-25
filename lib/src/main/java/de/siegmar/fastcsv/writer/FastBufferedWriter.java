@@ -8,6 +8,7 @@ import java.io.Writer;
 class FastBufferedWriter extends FilterWriter implements Writable {
 
     private final char[] buf;
+
     private int pos;
 
     FastBufferedWriter(final Writer writer, final int bufferSize) {
@@ -17,42 +18,22 @@ class FastBufferedWriter extends FilterWriter implements Writable {
 
     @Override
     public void write(final int c) throws IOException {
-        if (pos == buf.length) {
-            flushBuffer();
-        }
-        buf[pos++] = (char) c;
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
     @Override
     public void write(final char[] cbuf, final int off, final int len) throws IOException {
-        if (pos + len >= buf.length) {
-            flushBuffer();
-            if (len >= buf.length) {
-                out.write(cbuf, off, len);
-                return;
-            }
-        }
-
-        System.arraycopy(cbuf, off, buf, pos, len);
-        pos += len;
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
     @Override
     public void write(final String str, final int off, final int len) throws IOException {
-        if (pos + len >= buf.length) {
-            flushBuffer();
-            if (len >= buf.length) {
-                out.write(str, off, len);
-                return;
-            }
-        }
-
-        str.getChars(off, off + len, buf, pos);
-        pos += len;
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
     @Override
     public void endRecord() throws IOException {
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
     private void flushBuffer() throws IOException {
@@ -62,14 +43,11 @@ class FastBufferedWriter extends FilterWriter implements Writable {
 
     @Override
     public void flush() throws IOException {
-        flushBuffer();
-        super.flush();
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
     @Override
     public void close() throws IOException {
-        flushBuffer();
-        super.close();
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
-
 }

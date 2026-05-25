@@ -2,7 +2,6 @@ package de.siegmar.fastcsv.writer;
 
 import static de.siegmar.fastcsv.util.Util.CR;
 import static de.siegmar.fastcsv.util.Util.LF;
-
 import java.io.Closeable;
 import java.io.Flushable;
 import java.io.IOException;
@@ -17,7 +16,6 @@ import java.nio.file.OpenOption;
 import java.nio.file.Path;
 import java.util.Objects;
 import java.util.StringJoiner;
-
 import de.siegmar.fastcsv.util.Preconditions;
 import de.siegmar.fastcsv.util.Util;
 
@@ -31,38 +29,42 @@ import de.siegmar.fastcsv.util.Util;
 ///     csv.writeRecord("Hello", "world");
 /// }
 /// ```
-@SuppressWarnings({"checkstyle:NPathComplexity", "checkstyle:CyclomaticComplexity"})
+@SuppressWarnings({ "checkstyle:NPathComplexity", "checkstyle:CyclomaticComplexity" })
 public final class CsvWriter implements Closeable, Flushable {
 
     private final Writable writer;
+
     private final char fieldSeparator;
+
     private final char quoteCharacter;
+
     private final char commentCharacter;
+
     private final QuoteStrategy quoteStrategy;
+
     private final LineDelimiter lineDelimiter;
+
     private int currentLineNo = 1;
+
     private final char[] lineDelimiterChars;
+
     private final char[] emptyFieldValue;
+
     private boolean openRecordWriter;
 
     @SuppressWarnings("checkstyle:ParameterNumber")
-    CsvWriter(final Writable writer, final char fieldSeparator, final char quoteCharacter,
-              final char commentCharacter, final QuoteStrategy quoteStrategy, final LineDelimiter lineDelimiter) {
+    CsvWriter(final Writable writer, final char fieldSeparator, final char quoteCharacter, final char commentCharacter, final QuoteStrategy quoteStrategy, final LineDelimiter lineDelimiter) {
         Preconditions.checkArgument(!Util.isNewline(fieldSeparator), "fieldSeparator must not be a newline char");
         Preconditions.checkArgument(!Util.isNewline(quoteCharacter), "quoteCharacter must not be a newline char");
         Preconditions.checkArgument(!Util.isNewline(commentCharacter), "commentCharacter must not be a newline char");
-        Preconditions.checkArgument(!Util.containsDupe(fieldSeparator, quoteCharacter, commentCharacter),
-            "Control characters must differ (fieldSeparator=%s, quoteCharacter=%s, commentCharacter=%s)".formatted(
-                fieldSeparator, quoteCharacter, commentCharacter));
-
+        Preconditions.checkArgument(!Util.containsDupe(fieldSeparator, quoteCharacter, commentCharacter), "Control characters must differ (fieldSeparator=%s, quoteCharacter=%s, commentCharacter=%s)".formatted(fieldSeparator, quoteCharacter, commentCharacter));
         this.writer = writer;
         this.fieldSeparator = fieldSeparator;
         this.quoteCharacter = quoteCharacter;
         this.commentCharacter = commentCharacter;
         this.quoteStrategy = quoteStrategy;
         this.lineDelimiter = lineDelimiter;
-
-        emptyFieldValue = new char[] {quoteCharacter, quoteCharacter};
+        emptyFieldValue = new char[] { quoteCharacter, quoteCharacter };
         lineDelimiterChars = lineDelimiter.toString().toCharArray();
     }
 
@@ -71,7 +73,7 @@ public final class CsvWriter implements Closeable, Flushable {
     ///
     /// @return CsvWriterBuilder instance with default settings.
     public static CsvWriterBuilder builder() {
-        return new CsvWriterBuilder();
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
     /// Writes a complete line - one or more fields and new line character(s) at the end.
@@ -83,16 +85,7 @@ public final class CsvWriter implements Closeable, Flushable {
     /// @throws IllegalStateException if a record is already started (by calling [#writeRecord()]) and not ended
     /// @see #writeRecord(String...)
     public CsvWriter writeRecord(final Iterable<String> values) {
-        validateNoOpenRecord();
-        try {
-            int fieldIdx = 0;
-            for (final String value : values) {
-                writeInternal(value, fieldIdx++);
-            }
-            return endRecord();
-        } catch (final IOException e) {
-            throw new UncheckedIOException(e);
-        }
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
     /// Writes a complete line - one or more fields and new line character(s) at the end.
@@ -104,15 +97,7 @@ public final class CsvWriter implements Closeable, Flushable {
     /// @throws IllegalStateException if a record is already started (by calling [#writeRecord()]) and not ended
     /// @see #writeRecord(Iterable)
     public CsvWriter writeRecord(final String... values) {
-        validateNoOpenRecord();
-        try {
-            for (int i = 0; i < values.length; i++) {
-                writeInternal(values[i], i);
-            }
-            return endRecord();
-        } catch (final IOException e) {
-            throw new UncheckedIOException(e);
-        }
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
     /// Starts a new record.
@@ -125,9 +110,7 @@ public final class CsvWriter implements Closeable, Flushable {
     /// @see #writeRecord(String...)
     /// @see #writeRecord(Iterable)
     public CsvWriterRecord writeRecord() {
-        validateNoOpenRecord();
-        openRecordWriter = true;
-        return new CsvWriterRecord();
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
     private void validateNoOpenRecord() {
@@ -141,76 +124,55 @@ public final class CsvWriter implements Closeable, Flushable {
         if (fieldIdx > 0) {
             writer.write(fieldSeparator);
         }
-
         if (value == null) {
             if (quoteStrategy.quoteNull(currentLineNo, fieldIdx)) {
                 writer.write(emptyFieldValue, 0, emptyFieldValue.length);
             }
             return;
         }
-
         final int length = value.length();
-
         if (length == 0) {
             if (quoteStrategy.quoteEmpty(currentLineNo, fieldIdx)) {
                 writer.write(emptyFieldValue, 0, emptyFieldValue.length);
             }
             return;
         }
-
         final boolean needsEscape = containsControlCharacter(value, fieldIdx, length);
         final boolean needsQuotes = needsEscape || quoteStrategy.quoteValue(currentLineNo, fieldIdx, value);
-
         if (needsQuotes) {
             writer.write(quoteCharacter);
         }
-
         if (needsEscape) {
             writeEscaped(writer, value, quoteCharacter);
         } else {
             writer.write(value, 0, length);
         }
-
         if (needsQuotes) {
             writer.write(quoteCharacter);
         }
     }
 
-    @SuppressWarnings({
-        "checkstyle:BooleanExpressionComplexity",
-        "checkstyle:ReturnCount",
-        "checkstyle:MagicNumber",
-        "PMD.AvoidLiteralsInIfCondition"
-    })
+    @SuppressWarnings({ "checkstyle:BooleanExpressionComplexity", "checkstyle:ReturnCount", "checkstyle:MagicNumber", "PMD.AvoidLiteralsInIfCondition" })
     private boolean containsControlCharacter(final String value, final int fieldIdx, final int length) {
         if (fieldIdx == 0 && value.charAt(0) == commentCharacter) {
             return true;
         }
-
         // For longer values, indexOf is faster than iterating over the string
         if (length > 20) {
-            return value.indexOf(quoteCharacter) != -1
-                || value.indexOf(fieldSeparator) != -1
-                || value.indexOf(LF) != -1
-                || value.indexOf(CR) != -1;
+            return value.indexOf(quoteCharacter) != -1 || value.indexOf(fieldSeparator) != -1 || value.indexOf(LF) != -1 || value.indexOf(CR) != -1;
         }
-
         for (int i = 0; i < length; i++) {
             final char c = value.charAt(i);
             if (c == quoteCharacter || c == fieldSeparator || c == LF || c == CR) {
                 return true;
             }
         }
-
         return false;
     }
 
-    private static void writeEscaped(final Writable w, final String value, final char quoteChar)
-        throws IOException {
-
+    private static void writeEscaped(final Writable w, final String value, final char quoteChar) throws IOException {
         int startPos = 0;
         int nextDelimPos = value.indexOf(quoteChar, startPos);
-
         while (nextDelimPos != -1) {
             // Write up to and including the delimiter
             w.write(value, startPos, nextDelimPos - startPos + 1);
@@ -218,7 +180,6 @@ public final class CsvWriter implements Closeable, Flushable {
             startPos = nextDelimPos + 1;
             nextDelimPos = value.indexOf(quoteChar, startPos);
         }
-
         // Write the rest of the string
         w.write(value, startPos, value.length() - startPos);
     }
@@ -237,21 +198,11 @@ public final class CsvWriter implements Closeable, Flushable {
     /// @throws UncheckedIOException if a write-error occurs
     /// @throws IllegalStateException if a record is already started (by calling [#writeRecord()]) and not ended
     public CsvWriter writeComment(final String comment) {
-        validateNoOpenRecord();
-        try {
-            writer.write(commentCharacter);
-            if (comment != null && !comment.isEmpty()) {
-                writeCommentInternal(comment);
-            }
-            return endRecord();
-        } catch (final IOException e) {
-            throw new UncheckedIOException(e);
-        }
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
     private void writeCommentInternal(final String comment) throws IOException {
         final int length = comment.length();
-
         int startPos = 0;
         int lastChar = 0;
         for (int i = 0; i < length; i++) {
@@ -265,10 +216,8 @@ public final class CsvWriter implements Closeable, Flushable {
                 }
                 startPos = i + 1;
             }
-
             lastChar = c;
         }
-
         if (length > startPos) {
             writer.write(comment, startPos, length - startPos);
         }
@@ -286,7 +235,6 @@ public final class CsvWriter implements Closeable, Flushable {
         ++currentLineNo;
         writer.write(lineDelimiterChars, 0, lineDelimiterChars.length);
         writer.endRecord();
-
         return this;
     }
 
@@ -295,7 +243,7 @@ public final class CsvWriter implements Closeable, Flushable {
     /// @throws IOException if an I/O error occurs
     @Override
     public void close() throws IOException {
-        writer.close();
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
     /// Flushes any buffered data to the underlying writer.
@@ -303,18 +251,12 @@ public final class CsvWriter implements Closeable, Flushable {
     /// @throws IOException if an I/O error occurs
     @Override
     public void flush() throws IOException {
-        writer.flush();
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
     @Override
     public String toString() {
-        return new StringJoiner(", ", CsvWriter.class.getSimpleName() + "[", "]")
-            .add("fieldSeparator=" + fieldSeparator)
-            .add("quoteCharacter=" + quoteCharacter)
-            .add("commentCharacter=" + commentCharacter)
-            .add("quoteStrategy=" + quoteStrategy)
-            .add("lineDelimiter='" + lineDelimiter + "'")
-            .toString();
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
     /// This builder is used to create configured instances of [CsvWriter]. The default
@@ -327,17 +269,23 @@ public final class CsvWriter implements Closeable, Flushable {
     /// - line delimiter: [LineDelimiter#CRLF]
     /// - buffer size: 8,192 bytes
     /// - auto flush: `false`
-    @SuppressWarnings({"checkstyle:HiddenField", "PMD.AvoidFieldNameMatchingMethodName"})
+    @SuppressWarnings({ "checkstyle:HiddenField", "PMD.AvoidFieldNameMatchingMethodName" })
     public static final class CsvWriterBuilder {
 
         private static final int DEFAULT_BUFFER_SIZE = 8192;
 
         private char fieldSeparator = ',';
+
         private char quoteCharacter = '"';
+
         private char commentCharacter = '#';
+
         private QuoteStrategy quoteStrategy = QuoteStrategies.REQUIRED;
+
         private LineDelimiter lineDelimiter = LineDelimiter.CRLF;
+
         private int bufferSize = DEFAULT_BUFFER_SIZE;
+
         private boolean autoFlush;
 
         CsvWriterBuilder() {
@@ -348,8 +296,7 @@ public final class CsvWriter implements Closeable, Flushable {
         /// @param fieldSeparator the field separator character.
         /// @return This updated object, allowing additional method calls to be chained together.
         public CsvWriterBuilder fieldSeparator(final char fieldSeparator) {
-            this.fieldSeparator = fieldSeparator;
-            return this;
+            throw new UnsupportedOperationException("STUB: not implemented");
         }
 
         /// Sets the character used to quote values – default: `"` (double quote).
@@ -360,8 +307,7 @@ public final class CsvWriter implements Closeable, Flushable {
         /// @param quoteCharacter the character for enclosing fields.
         /// @return This updated object, allowing additional method calls to be chained together.
         public CsvWriterBuilder quoteCharacter(final char quoteCharacter) {
-            this.quoteCharacter = quoteCharacter;
-            return this;
+            throw new UnsupportedOperationException("STUB: not implemented");
         }
 
         /// Sets the character used to prepend commented lines – default: `#` (hash/number).
@@ -369,8 +315,7 @@ public final class CsvWriter implements Closeable, Flushable {
         /// @param commentCharacter the character for prepending commented lines.
         /// @return This updated object, allowing additional method calls to be chained together.
         public CsvWriterBuilder commentCharacter(final char commentCharacter) {
-            this.commentCharacter = commentCharacter;
-            return this;
+            throw new UnsupportedOperationException("STUB: not implemented");
         }
 
         /// Sets the strategy that defines when optional quoting has to be performed
@@ -382,8 +327,7 @@ public final class CsvWriter implements Closeable, Flushable {
         /// @throws NullPointerException if quoteStrategy is `null`
         /// @see QuoteStrategies
         public CsvWriterBuilder quoteStrategy(final QuoteStrategy quoteStrategy) {
-            this.quoteStrategy = Objects.requireNonNull(quoteStrategy, "quoteStrategy must not be null");
-            return this;
+            throw new UnsupportedOperationException("STUB: not implemented");
         }
 
         /// Sets the delimiter used to separate lines (default: [LineDelimiter#CRLF]).
@@ -392,8 +336,7 @@ public final class CsvWriter implements Closeable, Flushable {
         /// @return This updated object, allowing additional method calls to be chained together.
         /// @throws NullPointerException if lineDelimiter is `null`
         public CsvWriterBuilder lineDelimiter(final LineDelimiter lineDelimiter) {
-            this.lineDelimiter = Objects.requireNonNull(lineDelimiter, "lineDelimiter must not be null");
-            return this;
+            throw new UnsupportedOperationException("STUB: not implemented");
         }
 
         /// Configures the size of the internal buffer.
@@ -409,9 +352,7 @@ public final class CsvWriter implements Closeable, Flushable {
         /// @return This updated object, allowing additional method calls to be chained together.
         /// @throws IllegalArgumentException if bufferSize is negative
         public CsvWriterBuilder bufferSize(final int bufferSize) {
-            Preconditions.checkArgument(bufferSize >= 0, "buffer size must be >= 0");
-            this.bufferSize = bufferSize;
-            return this;
+            throw new UnsupportedOperationException("STUB: not implemented");
         }
 
         /// Configures whether data should be flushed after each record write operation.
@@ -423,8 +364,7 @@ public final class CsvWriter implements Closeable, Flushable {
         /// @param autoFlush whether the data should be flushed after each record write operation.
         /// @return This updated object, allowing additional method calls to be chained together.
         public CsvWriterBuilder autoFlush(final boolean autoFlush) {
-            this.autoFlush = autoFlush;
-            return this;
+            throw new UnsupportedOperationException("STUB: not implemented");
         }
 
         /// Constructs a [CsvWriter] for the specified OutputStream.
@@ -437,7 +377,7 @@ public final class CsvWriter implements Closeable, Flushable {
         /// @throws NullPointerException if outputStream is `null`
         /// @see #build(OutputStream, Charset)
         public CsvWriter build(final OutputStream outputStream) {
-            return build(outputStream, StandardCharsets.UTF_8);
+            throw new UnsupportedOperationException("STUB: not implemented");
         }
 
         /// Constructs a [CsvWriter] for the specified OutputStream and character set.
@@ -457,10 +397,7 @@ public final class CsvWriter implements Closeable, Flushable {
         /// @throws NullPointerException if outputStream or charset is `null`
         /// @see #build(OutputStream)
         public CsvWriter build(final OutputStream outputStream, final Charset charset) {
-            Objects.requireNonNull(outputStream, "outputStream must not be null");
-            Objects.requireNonNull(charset, "charset must not be null");
-
-            return csvWriter(new OutputStreamWriter(outputStream, charset), bufferSize, autoFlush);
+            throw new UnsupportedOperationException("STUB: not implemented");
         }
 
         /// Constructs a [CsvWriter] for the specified Writer.
@@ -476,9 +413,7 @@ public final class CsvWriter implements Closeable, Flushable {
         /// @return a new CsvWriter instance - never `null`. Remember to close it!
         /// @throws NullPointerException if writer is `null`
         public CsvWriter build(final Writer writer) {
-            Objects.requireNonNull(writer, "writer must not be null");
-
-            return csvWriter(writer, bufferSize, autoFlush);
+            throw new UnsupportedOperationException("STUB: not implemented");
         }
 
         /// Constructs a [CsvWriter] for the specified Path.
@@ -492,9 +427,8 @@ public final class CsvWriter implements Closeable, Flushable {
         /// @return a new CsvWriter instance - never `null`. Remember to close it!
         /// @throws IOException          if a write-error occurs
         /// @throws NullPointerException if file or charset is `null`
-        public CsvWriter build(final Path file, final OpenOption... openOptions)
-            throws IOException {
-            return build(file, StandardCharsets.UTF_8, openOptions);
+        public CsvWriter build(final Path file, final OpenOption... openOptions) throws IOException {
+            throw new UnsupportedOperationException("STUB: not implemented");
         }
 
         /// Constructs a [CsvWriter] for the specified Path.
@@ -506,15 +440,8 @@ public final class CsvWriter implements Closeable, Flushable {
         /// @return a new CsvWriter instance - never `null`. Remember to close it!
         /// @throws IOException          if a write-error occurs
         /// @throws NullPointerException if file or charset is `null`
-        public CsvWriter build(final Path file, final Charset charset,
-                               final OpenOption... openOptions)
-            throws IOException {
-
-            Objects.requireNonNull(file, "file must not be null");
-            Objects.requireNonNull(charset, "charset must not be null");
-
-            return csvWriter(new OutputStreamWriter(Files.newOutputStream(file, openOptions),
-                charset), bufferSize, autoFlush);
+        public CsvWriter build(final Path file, final Charset charset, final OpenOption... openOptions) throws IOException {
+            throw new UnsupportedOperationException("STUB: not implemented");
         }
 
         /// Convenience method to write to the console (standard output).
@@ -532,38 +459,24 @@ public final class CsvWriter implements Closeable, Flushable {
         ///     Calls to [CsvWriter#close()] are ignored, standard out remains open.
         @SuppressWarnings("checkstyle:RegexpMultiline")
         public CsvWriter toConsole() {
-            final Writer writer = new NoCloseWriter(new OutputStreamWriter(System.out, Charset.defaultCharset()));
-            return csvWriter(writer, 0, true);
+            throw new UnsupportedOperationException("STUB: not implemented");
         }
 
-        private CsvWriter csvWriter(final Writer writer, final int bufferSize,
-                                    final boolean autoFlushWriter) {
-            return new CsvWriter(wrapWriter(writer, bufferSize, autoFlushWriter),
-                fieldSeparator, quoteCharacter, commentCharacter, quoteStrategy, lineDelimiter);
+        private CsvWriter csvWriter(final Writer writer, final int bufferSize, final boolean autoFlushWriter) {
+            return new CsvWriter(wrapWriter(writer, bufferSize, autoFlushWriter), fieldSeparator, quoteCharacter, commentCharacter, quoteStrategy, lineDelimiter);
         }
 
         private static Writable wrapWriter(final Writer writer, final int bufferSize, final boolean autoFlushWriter) {
             if (bufferSize == 0) {
                 return new UnbufferedWriter(writer, autoFlushWriter);
             }
-            return autoFlushWriter
-                ? new AutoflushingFastBufferedWriter(writer, bufferSize)
-                : new FastBufferedWriter(writer, bufferSize);
+            return autoFlushWriter ? new AutoflushingFastBufferedWriter(writer, bufferSize) : new FastBufferedWriter(writer, bufferSize);
         }
 
         @Override
         public String toString() {
-            return new StringJoiner(", ", CsvWriterBuilder.class.getSimpleName() + "[", "]")
-                .add("fieldSeparator=" + fieldSeparator)
-                .add("quoteCharacter=" + quoteCharacter)
-                .add("commentCharacter=" + commentCharacter)
-                .add("quoteStrategy=" + quoteStrategy)
-                .add("lineDelimiter=" + lineDelimiter)
-                .add("bufferSize=" + bufferSize)
-                .add("autoFlush=" + autoFlush)
-                .toString();
+            throw new UnsupportedOperationException("STUB: not implemented");
         }
-
     }
 
     /// This class is used to write a record field by field.
@@ -592,26 +505,14 @@ public final class CsvWriter implements Closeable, Flushable {
         /// @return this CsvWriterRecord instance
         /// @throws UncheckedIOException if a write-error occurs
         public CsvWriterRecord writeField(final String value) {
-            try {
-                writeInternal(value, fieldIdx++);
-            } catch (final IOException e) {
-                throw new UncheckedIOException(e);
-            }
-            return this;
+            throw new UnsupportedOperationException("STUB: not implemented");
         }
 
         /// Ends the current record.
         /// @return the enclosing CsvWriter instance
         /// @throws UncheckedIOException if a write-error occurs
         public CsvWriter endRecord() {
-            openRecordWriter = false;
-            try {
-                return CsvWriter.this.endRecord();
-            } catch (final IOException e) {
-                throw new UncheckedIOException(e);
-            }
+            throw new UnsupportedOperationException("STUB: not implemented");
         }
-
     }
-
 }

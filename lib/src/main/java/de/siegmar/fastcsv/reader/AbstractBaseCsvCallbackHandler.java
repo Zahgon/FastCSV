@@ -8,7 +8,9 @@ package de.siegmar.fastcsv.reader;
 public abstract class AbstractBaseCsvCallbackHandler<T> extends CsvCallbackHandler<T> {
 
     private long startingLineNumber;
+
     private RecordType recordType = RecordType.DATA;
+
     private int fieldCount;
 
     /// Constructs a new instance.
@@ -21,19 +23,19 @@ public abstract class AbstractBaseCsvCallbackHandler<T> extends CsvCallbackHandl
     ///
     /// @return the starting line number of the current record
     protected long getStartingLineNumber() {
-        return startingLineNumber;
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
     /// {@inheritDoc}
     @Override
     protected RecordType getRecordType() {
-        return recordType;
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
     /// {@return the number of fields in the current record.}
     @Override
     protected int getFieldCount() {
-        return fieldCount;
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
     /// {@inheritDoc}
@@ -41,10 +43,7 @@ public abstract class AbstractBaseCsvCallbackHandler<T> extends CsvCallbackHandl
     @SuppressWarnings("checkstyle:HiddenField")
     @Override
     protected final void beginRecord(final long startingLineNumber) {
-        this.startingLineNumber = startingLineNumber;
-        fieldCount = 0;
-        recordType = RecordType.DATA;
-        handleBegin(startingLineNumber);
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
     /// Handles the beginning of a record.
@@ -54,6 +53,7 @@ public abstract class AbstractBaseCsvCallbackHandler<T> extends CsvCallbackHandl
     /// @param startingLineNumber the line number where the record starts (starting with 1)
     @SuppressWarnings("checkstyle:HiddenField")
     protected void handleBegin(final long startingLineNumber) {
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
     /// {@inheritDoc}
@@ -62,7 +62,7 @@ public abstract class AbstractBaseCsvCallbackHandler<T> extends CsvCallbackHandl
     /// before incrementing the [#fieldCount].
     @Override
     protected final void addField(final char[] buf, final int offset, final int len, final boolean quoted) {
-        handleField(fieldCount++, buf, offset, len, quoted);
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
     /// Handles a field.
@@ -76,8 +76,8 @@ public abstract class AbstractBaseCsvCallbackHandler<T> extends CsvCallbackHandl
     /// @param offset   the offset of the field value in the buffer
     /// @param len      the length of the field value
     /// @param quoted   `true` if the field was quoted
-    protected void handleField(final int fieldIdx, final char[] buf, final int offset, final int len,
-                               final boolean quoted) {
+    protected void handleField(final int fieldIdx, final char[] buf, final int offset, final int len, final boolean quoted) {
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
     /// {@inheritDoc}
@@ -86,9 +86,7 @@ public abstract class AbstractBaseCsvCallbackHandler<T> extends CsvCallbackHandl
     /// and before incrementing the [#fieldCount].
     @Override
     protected final void setComment(final char[] buf, final int offset, final int len) {
-        recordType = RecordType.COMMENT;
-        handleComment(buf, offset, len);
-        fieldCount = 1;
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
     /// Handles a comment.
@@ -101,6 +99,7 @@ public abstract class AbstractBaseCsvCallbackHandler<T> extends CsvCallbackHandl
     /// @param offset the offset of the field value in the buffer
     /// @param len    the length of the field value
     protected void handleComment(final char[] buf, final int offset, final int len) {
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
     /// {@inheritDoc}
@@ -109,15 +108,13 @@ public abstract class AbstractBaseCsvCallbackHandler<T> extends CsvCallbackHandl
     /// and before setting the [#fieldCount] to 1.
     @Override
     protected final void setEmpty() {
-        recordType = RecordType.EMPTY;
-        handleEmpty();
-        fieldCount = 1;
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
     /// Handles an empty line.
     ///
     /// This method is called for each empty line.
     protected void handleEmpty() {
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
-
 }

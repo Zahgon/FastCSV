@@ -14,7 +14,7 @@ public interface QuoteStrategy {
     /// @param fieldIdx the field index (0-based)
     /// @return `true`, if a `null` field should be quoted
     default boolean quoteNull(final int lineNo, final int fieldIdx) {
-        return false;
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
     /// Determine if an empty (not `null`) field should be quoted.
@@ -23,7 +23,7 @@ public interface QuoteStrategy {
     /// @param fieldIdx the field index (0-based)
     /// @return `true`, if an empty field should be quoted
     default boolean quoteEmpty(final int lineNo, final int fieldIdx) {
-        return false;
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
     /// Determine if a data containing field (neither `null` nor empty) should be quoted.
@@ -33,7 +33,6 @@ public interface QuoteStrategy {
     /// @param value    the field value; never `null`
     /// @return `true`, if a data containing field should be quoted
     default boolean quoteValue(final int lineNo, final int fieldIdx, final String value) {
-        return false;
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
-
 }

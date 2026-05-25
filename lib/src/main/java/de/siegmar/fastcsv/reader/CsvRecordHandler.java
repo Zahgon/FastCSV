@@ -15,8 +15,7 @@ import java.util.function.Consumer;
 /// This implementation is stateful and must not be reused.
 public final class CsvRecordHandler extends AbstractInternalCsvCallbackHandler<CsvRecord> {
 
-    private CsvRecordHandler(final int maxFields, final int maxFieldSize, final int maxRecordSize,
-                             final FieldModifier fieldModifier) {
+    private CsvRecordHandler(final int maxFields, final int maxFieldSize, final int maxRecordSize, final FieldModifier fieldModifier) {
         super(maxFields, maxFieldSize, maxRecordSize, fieldModifier);
     }
 
@@ -25,7 +24,7 @@ public final class CsvRecordHandler extends AbstractInternalCsvCallbackHandler<C
     /// @return the builder
     /// @see #of(Consumer)
     public static CsvRecordHandlerBuilder builder() {
-        return new CsvRecordHandlerBuilder();
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
     /// Constructs a new instance of this class with default settings.
@@ -33,7 +32,7 @@ public final class CsvRecordHandler extends AbstractInternalCsvCallbackHandler<C
     /// @return the new instance
     /// @see CsvRecordHandlerBuilder#build()
     public static CsvRecordHandler of() {
-        return builder().build();
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
     /// Constructs a new instance of this class with the given configuration.
@@ -46,27 +45,23 @@ public final class CsvRecordHandler extends AbstractInternalCsvCallbackHandler<C
     /// @throws IllegalArgumentException if argument constraints are violated
     /// @see #builder()
     public static CsvRecordHandler of(final Consumer<CsvRecordHandlerBuilder> configurer) {
-        Objects.requireNonNull(configurer, "configurer must not be null");
-        final CsvRecordHandlerBuilder builder = builder();
-        configurer.accept(builder);
-        return builder.build();
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
     @Override
     protected CsvRecord buildRecord() {
-        return new CsvRecord(startingLineNumber, compactFields(), recordType == RecordType.COMMENT);
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
     /// A builder for [CsvRecordHandler].
-    public static final class CsvRecordHandlerBuilder
-        extends AbstractInternalCsvCallbackHandlerBuilder<CsvRecordHandlerBuilder> {
+    public static final class CsvRecordHandlerBuilder extends AbstractInternalCsvCallbackHandlerBuilder<CsvRecordHandlerBuilder> {
 
         private CsvRecordHandlerBuilder() {
         }
 
         @Override
         protected CsvRecordHandlerBuilder self() {
-            return this;
+            throw new UnsupportedOperationException("STUB: not implemented");
         }
 
         /// Builds the [CsvRecordHandler] instance.
@@ -75,9 +70,7 @@ public final class CsvRecordHandler extends AbstractInternalCsvCallbackHandler<C
         /// @throws IllegalArgumentException if argument constraints are violated
         ///     (see [AbstractInternalCsvCallbackHandler])
         public CsvRecordHandler build() {
-            return new CsvRecordHandler(maxFields, maxFieldSize, maxRecordSize, fieldModifier);
+            throw new UnsupportedOperationException("STUB: not implemented");
         }
-
     }
-
 }

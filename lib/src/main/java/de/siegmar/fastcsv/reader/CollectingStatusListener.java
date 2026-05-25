@@ -11,9 +11,13 @@ import java.util.concurrent.atomic.AtomicReference;
 public class CollectingStatusListener implements StatusListener {
 
     private final AtomicLong fileSize = new AtomicLong();
+
     private final AtomicLong recordCount = new AtomicLong();
+
     private final AtomicLong byteCount = new AtomicLong();
+
     private final AtomicBoolean completionStatus = new AtomicBoolean();
+
     private final AtomicReference<Throwable> failedThrowable = new AtomicReference<>();
 
     /// Default constructor.
@@ -24,71 +28,66 @@ public class CollectingStatusListener implements StatusListener {
     @SuppressWarnings("checkstyle:HiddenField")
     @Override
     public void onInit(final long fileSize) {
-        this.fileSize.set(fileSize);
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
     /// Get the total size in bytes.
     ///
     /// @return the total size in bytes
     public long getFileSize() {
-        return fileSize.get();
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
     @Override
     public void onReadRecord() {
-        recordCount.incrementAndGet();
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
     /// Get the number of records already indexed.
     ///
     /// @return the number of records already indexed
     public long getRecordCount() {
-        return recordCount.longValue();
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
     @Override
     public void onReadBytes(final int bytes) {
-        byteCount.addAndGet(bytes);
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
     /// Get the number of bytes already read.
     ///
     /// @return the number of bytes already read
     public long getByteCount() {
-        return byteCount.longValue();
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
     @Override
     public void onComplete() {
-        completionStatus.set(true);
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
     /// Get the completion status.
     ///
     /// @return `true`, when all data have been indexed successfully
     public boolean isCompleted() {
-        return completionStatus.get();
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
     @Override
     public void onError(final Throwable throwable) {
-        failedThrowable.set(throwable);
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
     /// Get the throwable that occurred while indexing.
     ///
     /// @return the throwable that occurred while indexing.
     public Optional<Throwable> getThrowable() {
-        return Optional.ofNullable(failedThrowable.get());
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
     @Override
     public String toString() {
-        final long byteCntVal = byteCount.longValue();
-        final long currentFileSize = fileSize.get();
-        final double percentage = byteCntVal * 100.0 / currentFileSize;
-        return "Read %,d records and %,d of %,d bytes (%.2f %%)"
-            .formatted(recordCount.longValue(), byteCntVal, currentFileSize, percentage);
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
-
 }

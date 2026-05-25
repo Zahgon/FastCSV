@@ -19,7 +19,6 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
-
 import de.siegmar.fastcsv.util.Nullable;
 import de.siegmar.fastcsv.util.Preconditions;
 
@@ -59,39 +58,41 @@ import de.siegmar.fastcsv.util.Preconditions;
 public final class CsvReader<T> implements Iterable<T>, Closeable {
 
     private final CsvParser csvParser;
+
     private final CsvCallbackHandler<T> callbackHandler;
+
     private final CommentStrategy commentStrategy;
+
     private final boolean skipEmptyLines;
+
     private final FieldMismatchStrategy extraFieldStrategy;
+
     private final FieldMismatchStrategy missingFieldStrategy;
+
     private final boolean fieldCountConsistencyCheck;
+
     private final CloseableIterator<T> csvRecordIterator = new CsvRecordIterator();
 
     private int firstRecordFieldCount = -1;
+
     private boolean parsingStarted;
 
     @SuppressWarnings("checkstyle:ParameterNumber")
-    CsvReader(final CsvParser csvParser, final CsvCallbackHandler<T> callbackHandler,
-              final CommentStrategy commentStrategy, final boolean skipEmptyLines,
-              final FieldMismatchStrategy extraFieldStrategy,
-              final FieldMismatchStrategy missingFieldStrategy) {
-
+    CsvReader(final CsvParser csvParser, final CsvCallbackHandler<T> callbackHandler, final CommentStrategy commentStrategy, final boolean skipEmptyLines, final FieldMismatchStrategy extraFieldStrategy, final FieldMismatchStrategy missingFieldStrategy) {
         this.csvParser = csvParser;
         this.callbackHandler = callbackHandler;
         this.commentStrategy = commentStrategy;
         this.skipEmptyLines = skipEmptyLines;
         this.extraFieldStrategy = extraFieldStrategy;
         this.missingFieldStrategy = missingFieldStrategy;
-        fieldCountConsistencyCheck =
-            extraFieldStrategy != FieldMismatchStrategy.IGNORE
-            || missingFieldStrategy != FieldMismatchStrategy.IGNORE;
+        fieldCountConsistencyCheck = extraFieldStrategy != FieldMismatchStrategy.IGNORE || missingFieldStrategy != FieldMismatchStrategy.IGNORE;
     }
 
     /// Constructs a [CsvReaderBuilder] to configure and build instances of this class.
     ///
     /// @return a new [CsvReaderBuilder] instance.
     public static CsvReaderBuilder builder() {
-        return new CsvReaderBuilder();
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
     /// Skips the specified number of lines.
@@ -110,23 +111,7 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
     /// @throws UncheckedIOException     if an I/O error occurs.
     /// @throws CsvParseException        unless enough lines are available to skip.
     public void skipLines(final int lineCount) {
-        if (lineCount < 0) {
-            throw new IllegalArgumentException("lineCount must be non-negative");
-        }
-        if (parsingStarted) {
-            throw new IllegalStateException("skipLines must be called before any CSV records are read");
-        }
-
-        int i = 0;
-        try {
-            for (; i < lineCount; i++) {
-                csvParser.skipLine(0);
-            }
-        } catch (final EOFException e) {
-            throw new CsvParseException("Not enough lines to skip. Skipped only %d line(s).".formatted(i), e);
-        } catch (final IOException e) {
-            throw new UncheckedIOException(e);
-        }
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
     /// Skip lines until the specified predicate matches.
@@ -152,36 +137,7 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
     /// @throws UncheckedIOException if an I/O error occurs.
     /// @throws CsvParseException if no matching line is found within the maximum limit of maxLines.
     public int skipLines(final Predicate<String> predicate, final int maxLines) {
-        Objects.requireNonNull(predicate, "predicate must not be null");
-        if (maxLines < 0) {
-            throw new IllegalArgumentException("maxLines must be non-negative");
-        }
-        if (parsingStarted) {
-            throw new IllegalStateException("skipLines must be called before any CSV records are read");
-        }
-
-        if (maxLines == 0) {
-            return 0;
-        }
-
-        int i = 0;
-        try {
-            for (; i < maxLines; i++) {
-                final String line = csvParser.peekLine();
-                if (predicate.test(line)) {
-                    return i;
-                }
-                csvParser.skipLine(line.length());
-            }
-        } catch (final EOFException e) {
-            throw new CsvParseException(
-                "No matching line found. Skipped %d line(s) before reaching end of data.".formatted(i), e);
-        } catch (final IOException e) {
-            throw new UncheckedIOException(e);
-        }
-
-        throw new CsvParseException(
-            "No matching line found within the maximum limit of %d lines.".formatted(maxLines));
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
     /// {@return an iterator over elements of type [CsvRecord].}
@@ -197,7 +153,7 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
     /// @see #stream()
     @Override
     public CloseableIterator<T> iterator() {
-        return csvRecordIterator;
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
     /// Constructs a [Spliterator] for splitting and traversing the elements of this reader.
@@ -214,7 +170,7 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
     /// @see #stream()
     @Override
     public Spliterator<T> spliterator() {
-        return new CsvSpliterator();
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
     /// Constructs a new sequential `Stream` with this reader as its source.
@@ -232,14 +188,7 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
     /// @throws CsvParseException    if any other problem occurs when parsing the CSV data.
     /// @see #iterator()
     public Stream<T> stream() {
-        return StreamSupport.stream(spliterator(), false)
-            .onClose(() -> {
-                try {
-                    close();
-                } catch (final IOException e) {
-                    throw new UncheckedIOException(e);
-                }
-            });
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
     @Nullable
@@ -247,14 +196,11 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
         parsingStarted = true;
         while (csvParser.parse()) {
             final T csvRecord = processRecord();
-
             if (csvRecord != null) {
                 return csvRecord;
             }
         }
-
         callbackHandler.terminate();
-
         return null;
     }
 
@@ -262,23 +208,22 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
     @SuppressWarnings("checkstyle:ReturnCount")
     private T processRecord() {
         final T csvRecord = callbackHandler.buildRecord();
-
         // handle consumed records (e.g., header for named records)
         if (csvRecord == null) {
             return null;
         }
-
-        return switch (callbackHandler.getRecordType()) {
-            case DATA -> {
-                if (fieldCountConsistencyCheck
-                    && !checkFieldCountConsistency(callbackHandler.getFieldCount())) {
-                    yield null;
+        return switch(callbackHandler.getRecordType()) {
+            case DATA ->
+                {
+                    if (fieldCountConsistencyCheck && !checkFieldCountConsistency(callbackHandler.getFieldCount())) {
+                        yield null;
+                    }
+                    yield csvRecord;
                 }
-
-                yield csvRecord;
-            }
-            case COMMENT -> commentStrategy == CommentStrategy.SKIP ? null : csvRecord;
-            case EMPTY -> skipEmptyLines ? null : csvRecord;
+            case COMMENT ->
+                commentStrategy == CommentStrategy.SKIP ? null : csvRecord;
+            case EMPTY ->
+                skipEmptyLines ? null : csvRecord;
         };
     }
 
@@ -288,46 +233,38 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
             firstRecordFieldCount = fieldCount;
             return true;
         }
-
         if (fieldCount > firstRecordFieldCount) {
             return handleMismatch(extraFieldStrategy, fieldCount);
         }
-
         if (fieldCount < firstRecordFieldCount) {
             return handleMismatch(missingFieldStrategy, fieldCount);
         }
-
         return true;
     }
 
     private boolean handleMismatch(final FieldMismatchStrategy strategy, final int fieldCount) {
-        return switch (strategy) {
-            case STRICT -> throw new CsvParseException(
-                "Record %d has %d fields, but first record had %d fields"
-                    .formatted(csvParser.getStartingLineNumber(), fieldCount, firstRecordFieldCount));
-            case IGNORE -> true;
-            case SKIP -> false;
+        return switch(strategy) {
+            case STRICT ->
+                throw new CsvParseException("Record %d has %d fields, but first record had %d fields".formatted(csvParser.getStartingLineNumber(), fieldCount, firstRecordFieldCount));
+            case IGNORE ->
+                true;
+            case SKIP ->
+                false;
         };
     }
 
     @Override
     public void close() throws IOException {
-        csvParser.close();
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
     @Override
     public String toString() {
-        return new StringJoiner(", ", CsvReader.class.getSimpleName() + "[", "]")
-            .add("commentStrategy=" + commentStrategy)
-            .add("skipEmptyLines=" + skipEmptyLines)
-            .add("extraFieldStrategy=" + extraFieldStrategy)
-            .add("missingFieldStrategy=" + missingFieldStrategy)
-            .add("parser=" + csvParser.getClass().getSimpleName())
-            .toString();
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
     @Nullable
-    @SuppressWarnings({"checkstyle:IllegalCatch", "PMD.AvoidCatchingThrowable"})
+    @SuppressWarnings({ "checkstyle:IllegalCatch", "PMD.AvoidCatchingThrowable" })
     private T fetch() {
         try {
             return fetchRecord();
@@ -339,39 +276,31 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
     }
 
     private String buildExceptionMessage() {
-        return (csvParser.getStartingLineNumber() == 1)
-            ? "Exception when reading first record"
-            : "Exception when reading record that started in line %d".formatted(csvParser.getStartingLineNumber());
+        return (csvParser.getStartingLineNumber() == 1) ? "Exception when reading first record" : "Exception when reading record that started in line %d".formatted(csvParser.getStartingLineNumber());
     }
 
     private final class CsvSpliterator implements Spliterator<T> {
 
         @Override
         public boolean tryAdvance(final Consumer<? super T> action) {
-            final T t = fetch();
-            if (t != null) {
-                action.accept(t);
-                return true;
-            }
-            return false;
+            throw new UnsupportedOperationException("STUB: not implemented");
         }
 
         @Nullable
         @Override
         public Spliterator<T> trySplit() {
-            return null;
+            throw new UnsupportedOperationException("STUB: not implemented");
         }
 
         @Override
         public long estimateSize() {
-            return Long.MAX_VALUE;
+            throw new UnsupportedOperationException("STUB: not implemented");
         }
 
         @Override
         public int characteristics() {
-            return ORDERED | NONNULL;
+            throw new UnsupportedOperationException("STUB: not implemented");
         }
-
     }
 
     private final class CsvRecordIterator implements CloseableIterator<T> {
@@ -383,31 +312,18 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
 
         @Override
         public boolean hasNext() {
-            if (!fetched) {
-                fetchedRecord = fetch();
-                fetched = true;
-            }
-            return fetchedRecord != null;
+            throw new UnsupportedOperationException("STUB: not implemented");
         }
 
         @Override
         public T next() {
-            if (!fetched) {
-                fetchedRecord = fetch();
-            }
-            if (fetchedRecord == null) {
-                throw new NoSuchElementException();
-            }
-
-            fetched = false;
-            return fetchedRecord;
+            throw new UnsupportedOperationException("STUB: not implemented");
         }
 
         @Override
         public void close() throws IOException {
-            CsvReader.this.close();
+            throw new UnsupportedOperationException("STUB: not implemented");
         }
-
     }
 
     /// This builder is used to create configured instances of [CsvReader]. The default
@@ -427,22 +343,33 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
     ///
     /// The line delimiter (line-feed, carriage-return or the combination of both) is detected
     /// automatically and thus not configurable.
-    @SuppressWarnings({"checkstyle:HiddenField", "PMD.AvoidFieldNameMatchingMethodName"})
+    @SuppressWarnings({ "checkstyle:HiddenField", "PMD.AvoidFieldNameMatchingMethodName" })
     public static final class CsvReaderBuilder {
 
         private static final int DEFAULT_MAX_BUFFER_SIZE = 16 * 1024 * 1024;
 
         private String fieldSeparator = ",";
+
         private char quoteCharacter = '"';
+
         private CommentStrategy commentStrategy = CommentStrategy.NONE;
+
         private char commentCharacter = '#';
+
         private boolean skipEmptyLines = true;
+
         private FieldMismatchStrategy extraFieldStrategy = FieldMismatchStrategy.STRICT;
+
         private FieldMismatchStrategy missingFieldStrategy = FieldMismatchStrategy.STRICT;
+
         private boolean allowExtraCharsAfterClosingQuote;
+
         private boolean allowUnclosedQuote = true;
+
         private boolean trimWhitespacesAroundQuotes;
+
         private boolean detectBomHeader;
+
         private int maxBufferSize = DEFAULT_MAX_BUFFER_SIZE;
 
         private CsvReaderBuilder() {
@@ -454,8 +381,7 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
         /// @return This updated object, allowing additional method calls to be chained together.
         /// @see #fieldSeparator(String)
         public CsvReaderBuilder fieldSeparator(final char fieldSeparator) {
-            this.fieldSeparator = String.valueOf(fieldSeparator);
-            return this;
+            throw new UnsupportedOperationException("STUB: not implemented");
         }
 
         /// Sets the `fieldSeparator` used when reading CSV data.
@@ -472,11 +398,7 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
         /// @throws IllegalArgumentException if fieldSeparator is `null` or empty
         /// @see #fieldSeparator(char)
         public CsvReaderBuilder fieldSeparator(final String fieldSeparator) {
-            if (fieldSeparator == null || fieldSeparator.isEmpty()) {
-                throw new IllegalArgumentException("fieldSeparator must not be null or empty");
-            }
-            this.fieldSeparator = fieldSeparator;
-            return this;
+            throw new UnsupportedOperationException("STUB: not implemented");
         }
 
         /// Sets the `quoteCharacter` used when reading CSV data.
@@ -485,8 +407,7 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
         ///                       (default: `"` - double quotes).
         /// @return This updated object, allowing additional method calls to be chained together.
         public CsvReaderBuilder quoteCharacter(final char quoteCharacter) {
-            this.quoteCharacter = quoteCharacter;
-            return this;
+            throw new UnsupportedOperationException("STUB: not implemented");
         }
 
         /// Sets the strategy that defines how (and if) commented lines should be handled
@@ -501,8 +422,7 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
         /// @return This updated object, allowing additional method calls to be chained together.
         /// @see #commentCharacter(char)
         public CsvReaderBuilder commentStrategy(final CommentStrategy commentStrategy) {
-            this.commentStrategy = commentStrategy;
-            return this;
+            throw new UnsupportedOperationException("STUB: not implemented");
         }
 
         /// Sets the `commentCharacter` used to comment lines.
@@ -511,8 +431,7 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
         /// @return This updated object, allowing additional method calls to be chained together.
         /// @see #commentStrategy(CommentStrategy)
         public CsvReaderBuilder commentCharacter(final char commentCharacter) {
-            this.commentCharacter = commentCharacter;
-            return this;
+            throw new UnsupportedOperationException("STUB: not implemented");
         }
 
         /// Defines whether empty lines should be skipped when reading data.
@@ -526,8 +445,7 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
         /// @param skipEmptyLines Whether empty lines should be skipped (default: `true`).
         /// @return This updated object, allowing additional method calls to be chained together.
         public CsvReaderBuilder skipEmptyLines(final boolean skipEmptyLines) {
-            this.skipEmptyLines = skipEmptyLines;
-            return this;
+            throw new UnsupportedOperationException("STUB: not implemented");
         }
 
         /// Defines the strategy for handling records that contain more fields than the first record.
@@ -538,9 +456,7 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
         /// @throws NullPointerException if extraFieldStrategy is `null`
         /// @see #missingFieldStrategy(FieldMismatchStrategy)
         public CsvReaderBuilder extraFieldStrategy(final FieldMismatchStrategy extraFieldStrategy) {
-            this.extraFieldStrategy =
-                Objects.requireNonNull(extraFieldStrategy, "extraFieldStrategy must not be null");
-            return this;
+            throw new UnsupportedOperationException("STUB: not implemented");
         }
 
         /// Defines the strategy for handling records that contain fewer fields than the first record.
@@ -555,9 +471,7 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
         /// @see #extraFieldStrategy(FieldMismatchStrategy)
         /// @see #skipEmptyLines(boolean)
         public CsvReaderBuilder missingFieldStrategy(final FieldMismatchStrategy missingFieldStrategy) {
-            this.missingFieldStrategy =
-                Objects.requireNonNull(missingFieldStrategy, "missingFieldStrategy must not be null");
-            return this;
+            throw new UnsupportedOperationException("STUB: not implemented");
         }
 
         /// Defines whether a [CsvParseException] should be thrown if records contain
@@ -569,8 +483,7 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
         /// @deprecated Use [#extraFieldStrategy(FieldMismatchStrategy)] instead.
         @Deprecated(forRemoval = true)
         public CsvReaderBuilder allowExtraFields(final boolean allowExtraFields) {
-            this.extraFieldStrategy = allowExtraFields
-                ? FieldMismatchStrategy.IGNORE : FieldMismatchStrategy.STRICT;
+            this.extraFieldStrategy = allowExtraFields ? FieldMismatchStrategy.IGNORE : FieldMismatchStrategy.STRICT;
             return this;
         }
 
@@ -585,8 +498,7 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
         /// @deprecated Use [#missingFieldStrategy(FieldMismatchStrategy)] instead.
         @Deprecated(forRemoval = true)
         public CsvReaderBuilder allowMissingFields(final boolean allowMissingFields) {
-            this.missingFieldStrategy = allowMissingFields
-                ? FieldMismatchStrategy.IGNORE : FieldMismatchStrategy.STRICT;
+            this.missingFieldStrategy = allowMissingFields ? FieldMismatchStrategy.IGNORE : FieldMismatchStrategy.STRICT;
             return this;
         }
 
@@ -602,8 +514,7 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
         /// @param allowExtraCharsAfterClosingQuote allow extra characters after closing quotes (default: `false`).
         /// @return This updated object, allowing additional method calls to be chained together.
         public CsvReaderBuilder allowExtraCharsAfterClosingQuote(final boolean allowExtraCharsAfterClosingQuote) {
-            this.allowExtraCharsAfterClosingQuote = allowExtraCharsAfterClosingQuote;
-            return this;
+            throw new UnsupportedOperationException("STUB: not implemented");
         }
 
         /// Defines whether input that ends inside a quoted field (EOF before a closing quote) is tolerated.
@@ -621,8 +532,7 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
         /// @param allowUnclosedQuote allow input ending inside a quoted field (default: `true`).
         /// @return This updated object, allowing additional method calls to be chained together.
         public CsvReaderBuilder allowUnclosedQuote(final boolean allowUnclosedQuote) {
-            this.allowUnclosedQuote = allowUnclosedQuote;
-            return this;
+            throw new UnsupportedOperationException("STUB: not implemented");
         }
 
         /// Defines whether whitespaces before an opening quote and after a closing quote should be allowed and trimmed.
@@ -652,8 +562,7 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
         /// @param trimWhitespacesAroundQuotes if whitespaces should be allowed/trimmed (default: `false`).
         /// @return This updated object, allowing additional method calls to be chained together.
         public CsvReaderBuilder trimWhitespacesAroundQuotes(final boolean trimWhitespacesAroundQuotes) {
-            this.trimWhitespacesAroundQuotes = trimWhitespacesAroundQuotes;
-            return this;
+            throw new UnsupportedOperationException("STUB: not implemented");
         }
 
         /// Defines if an optional BOM (Byte order mark) header should be detected.
@@ -668,8 +577,7 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
         /// @param detectBomHeader if detection should be enabled (default: `false`)
         /// @return This updated object, allowing additional method calls to be chained together.
         public CsvReaderBuilder detectBomHeader(final boolean detectBomHeader) {
-            this.detectBomHeader = detectBomHeader;
-            return this;
+            throw new UnsupportedOperationException("STUB: not implemented");
         }
 
         /// Defines the maximum buffer size used when parsing data.
@@ -693,9 +601,7 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
         /// @return This updated object, allowing additional method calls to be chained together.
         /// @throws IllegalArgumentException if maxBufferSize is not positive
         public CsvReaderBuilder maxBufferSize(final int maxBufferSize) {
-            Preconditions.checkArgument(maxBufferSize > 0, "maxBufferSize must be greater than 0");
-            this.maxBufferSize = maxBufferSize;
-            return this;
+            throw new UnsupportedOperationException("STUB: not implemented");
         }
 
         /// Convenience method to read a single CSV record from the specified string.
@@ -708,7 +614,7 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
         /// @throws CsvParseException    if the data cannot be parsed
         /// @see #ofSingleCsvRecord(CsvCallbackHandler, String)
         public CsvRecord ofSingleCsvRecord(final String data) {
-            return ofSingleCsvRecord(CsvRecordHandler.of(), data);
+            throw new UnsupportedOperationException("STUB: not implemented");
         }
 
         /// Convenience method to read a single CSV record using a custom callback handler.
@@ -723,11 +629,7 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
         /// @throws CsvParseException    if the data cannot be parsed
         /// @see #ofSingleCsvRecord(String)
         public <T> T ofSingleCsvRecord(final CsvCallbackHandler<T> callbackHandler, final String data) {
-            final T fetchedRecord = build(callbackHandler, data).fetch();
-            if (fetchedRecord == null) {
-                throw new CsvParseException("No record found in the provided data");
-            }
-            return fetchedRecord;
+            throw new UnsupportedOperationException("STUB: not implemented");
         }
 
         /// Constructs a new index-based [CsvReader] for the specified input stream.
@@ -743,7 +645,7 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
         /// @throws NullPointerException if inputStream is `null`
         /// @see #ofCsvRecord(InputStream, Charset)
         public CsvReader<CsvRecord> ofCsvRecord(final InputStream inputStream) {
-            return build(CsvRecordHandler.of(), inputStream);
+            throw new UnsupportedOperationException("STUB: not implemented");
         }
 
         /// Constructs a new index-based [CsvReader] for the specified input stream and character set.
@@ -759,7 +661,7 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
         /// @throws NullPointerException if inputStream or charset is `null`
         /// @see #ofCsvRecord(InputStream)
         public CsvReader<CsvRecord> ofCsvRecord(final InputStream inputStream, final Charset charset) {
-            return build(CsvRecordHandler.of(), inputStream, charset);
+            throw new UnsupportedOperationException("STUB: not implemented");
         }
 
         /// Constructs a new index-based [CsvReader] for the specified reader.
@@ -773,7 +675,7 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
         /// @return a new CsvReader - never `null`.
         /// @throws NullPointerException if reader is `null`
         public CsvReader<CsvRecord> ofCsvRecord(final Reader reader) {
-            return build(CsvRecordHandler.of(), reader);
+            throw new UnsupportedOperationException("STUB: not implemented");
         }
 
         /// Constructs a new index-based [CsvReader] for the specified String.
@@ -787,7 +689,7 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
         /// @return a new CsvReader - never `null`.
         /// @throws NullPointerException if data is `null`
         public CsvReader<CsvRecord> ofCsvRecord(final String data) {
-            return build(CsvRecordHandler.of(), data);
+            throw new UnsupportedOperationException("STUB: not implemented");
         }
 
         /// Constructs a new index-based [CsvReader] for the specified file.
@@ -804,7 +706,7 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
         /// @throws NullPointerException if file is `null`
         /// @see #ofCsvRecord(Path, Charset)
         public CsvReader<CsvRecord> ofCsvRecord(final Path file) throws IOException {
-            return build(CsvRecordHandler.of(), file);
+            throw new UnsupportedOperationException("STUB: not implemented");
         }
 
         /// Constructs a new index-based [CsvReader] for the specified file and character set.
@@ -821,7 +723,7 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
         /// @throws NullPointerException if file or charset is `null`
         /// @see #ofCsvRecord(Path)
         public CsvReader<CsvRecord> ofCsvRecord(final Path file, final Charset charset) throws IOException {
-            return build(CsvRecordHandler.of(), file, charset);
+            throw new UnsupportedOperationException("STUB: not implemented");
         }
 
         /// Constructs a new name-based [CsvReader] for the specified input stream.
@@ -837,7 +739,7 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
         /// @throws NullPointerException if reader is `null`
         /// @see #ofNamedCsvRecord(InputStream, Charset)
         public CsvReader<NamedCsvRecord> ofNamedCsvRecord(final InputStream inputStream) {
-            return build(NamedCsvRecordHandler.of(), inputStream);
+            throw new UnsupportedOperationException("STUB: not implemented");
         }
 
         /// Constructs a new name-based [CsvReader] for the specified input stream and character set.
@@ -853,7 +755,7 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
         /// @throws NullPointerException if file or charset is `null`
         /// @see #ofNamedCsvRecord(InputStream)
         public CsvReader<NamedCsvRecord> ofNamedCsvRecord(final InputStream inputStream, final Charset charset) {
-            return build(NamedCsvRecordHandler.of(), inputStream, charset);
+            throw new UnsupportedOperationException("STUB: not implemented");
         }
 
         /// Constructs a new name-based [CsvReader] for the specified reader.
@@ -867,7 +769,7 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
         /// @return a new CsvReader - never `null`.
         /// @throws NullPointerException if reader is `null`
         public CsvReader<NamedCsvRecord> ofNamedCsvRecord(final Reader reader) {
-            return build(NamedCsvRecordHandler.of(), reader);
+            throw new UnsupportedOperationException("STUB: not implemented");
         }
 
         /// Constructs a new name-based [CsvReader] for the specified String.
@@ -881,7 +783,7 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
         /// @return a new CsvReader - never `null`.
         /// @throws NullPointerException if data is `null`
         public CsvReader<NamedCsvRecord> ofNamedCsvRecord(final String data) {
-            return build(NamedCsvRecordHandler.of(), data);
+            throw new UnsupportedOperationException("STUB: not implemented");
         }
 
         /// Constructs a new name-based [CsvReader] for the specified file.
@@ -898,7 +800,7 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
         /// @throws NullPointerException if file is `null`
         /// @see #ofNamedCsvRecord(Path, Charset)
         public CsvReader<NamedCsvRecord> ofNamedCsvRecord(final Path file) throws IOException {
-            return build(NamedCsvRecordHandler.of(), file);
+            throw new UnsupportedOperationException("STUB: not implemented");
         }
 
         /// Constructs a new name-based [CsvReader] for the specified file and character set.
@@ -914,9 +816,8 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
         /// @throws IOException          if an I/O error occurs.
         /// @throws NullPointerException if file or charset is `null`
         /// @see #ofNamedCsvRecord(Path)
-        public CsvReader<NamedCsvRecord> ofNamedCsvRecord(final Path file, final Charset charset)
-            throws IOException {
-            return build(NamedCsvRecordHandler.of(), file, charset);
+        public CsvReader<NamedCsvRecord> ofNamedCsvRecord(final Path file, final Charset charset) throws IOException {
+            throw new UnsupportedOperationException("STUB: not implemented");
         }
 
         /// Constructs a new callback-based [CsvReader] for the specified input stream.
@@ -939,7 +840,7 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
         /// @throws NullPointerException if callbackHandler or inputStream is `null`
         /// @see #build(CsvCallbackHandler, InputStream, Charset)
         public <T> CsvReader<T> build(final CsvCallbackHandler<T> callbackHandler, final InputStream inputStream) {
-            return build(callbackHandler, inputStream, StandardCharsets.UTF_8);
+            throw new UnsupportedOperationException("STUB: not implemented");
         }
 
         /// Constructs a new callback-based [CsvReader] for the specified input stream and character set.
@@ -963,18 +864,8 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
         /// @throws NullPointerException if callbackHandler, inputStream or charset is `null`
         /// @see #build(CsvCallbackHandler, InputStream)
         @SuppressWarnings("PMD.AvoidDuplicateLiterals")
-        public <T> CsvReader<T> build(final CsvCallbackHandler<T> callbackHandler,
-                                      final InputStream inputStream, final Charset charset) {
-
-            Objects.requireNonNull(callbackHandler, "callbackHandler must not be null");
-            Objects.requireNonNull(inputStream, "inputStream must not be null");
-            Objects.requireNonNull(charset, "charset must not be null");
-
-            final Reader reader = detectBomHeader
-                ? new BomInputStreamReader(inputStream, charset)
-                : new InputStreamReader(inputStream, charset);
-
-            return build(callbackHandler, reader);
+        public <T> CsvReader<T> build(final CsvCallbackHandler<T> callbackHandler, final InputStream inputStream, final Charset charset) {
+            throw new UnsupportedOperationException("STUB: not implemented");
         }
 
         /// Constructs a new callback-based [CsvReader] for the specified reader.
@@ -995,22 +886,7 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
         /// @throws NullPointerException if callbackHandler or reader is `null`
         /// @throws IllegalArgumentException if argument validation fails.
         public <T> CsvReader<T> build(final CsvCallbackHandler<T> callbackHandler, final Reader reader) {
-            Objects.requireNonNull(callbackHandler, "callbackHandler must not be null");
-            Objects.requireNonNull(reader, "reader must not be null");
-
-            final CsvParser csvParser;
-            if (isRelaxedConfiguration()) {
-                csvParser = new RelaxedCsvParser(fieldSeparator, quoteCharacter, commentStrategy,
-                    commentCharacter, trimWhitespacesAroundQuotes, allowUnclosedQuote, callbackHandler,
-                    maxBufferSize, reader
-                );
-            } else {
-                csvParser = new StrictCsvParser(fieldSeparator.charAt(0), quoteCharacter, commentStrategy,
-                    commentCharacter, allowExtraCharsAfterClosingQuote, allowUnclosedQuote,
-                    callbackHandler, maxBufferSize, reader);
-            }
-
-            return newReader(callbackHandler, csvParser);
+            throw new UnsupportedOperationException("STUB: not implemented");
         }
 
         /// Constructs a new callback-based [CsvReader] for the specified String.
@@ -1024,22 +900,7 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
         /// @throws NullPointerException if callbackHandler or data is `null`
         /// @throws IllegalArgumentException if argument validation fails.
         public <T> CsvReader<T> build(final CsvCallbackHandler<T> callbackHandler, final String data) {
-            Objects.requireNonNull(callbackHandler, "callbackHandler must not be null");
-            Objects.requireNonNull(data, "data must not be null");
-
-            final CsvParser csvParser;
-            if (isRelaxedConfiguration()) {
-                csvParser = new RelaxedCsvParser(fieldSeparator, quoteCharacter, commentStrategy,
-                    commentCharacter, trimWhitespacesAroundQuotes, allowUnclosedQuote, callbackHandler,
-                    maxBufferSize, data
-                );
-            } else {
-                csvParser = new StrictCsvParser(fieldSeparator.charAt(0), quoteCharacter, commentStrategy,
-                    commentCharacter, allowExtraCharsAfterClosingQuote, allowUnclosedQuote,
-                    callbackHandler, data);
-            }
-
-            return newReader(callbackHandler, csvParser);
+            throw new UnsupportedOperationException("STUB: not implemented");
         }
 
         /// Constructs a new callback-based [CsvReader] for the specified file.
@@ -1054,9 +915,8 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
         /// @throws IOException          if an I/O error occurs.
         /// @throws NullPointerException if callbackHandler or file is `null`
         /// @see #build(CsvCallbackHandler, Path, Charset)
-        public <T> CsvReader<T> build(final CsvCallbackHandler<T> callbackHandler, final Path file)
-            throws IOException {
-            return build(callbackHandler, file, StandardCharsets.UTF_8);
+        public <T> CsvReader<T> build(final CsvCallbackHandler<T> callbackHandler, final Path file) throws IOException {
+            throw new UnsupportedOperationException("STUB: not implemented");
         }
 
         /// Constructs a new callback-based [CsvReader] for the specified file and character set.
@@ -1071,22 +931,12 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
         /// @throws IOException          if an I/O error occurs.
         /// @throws NullPointerException if callbackHandler, file or charset is `null`
         /// @see #build(CsvCallbackHandler, Path)
-        public <T> CsvReader<T> build(final CsvCallbackHandler<T> callbackHandler,
-                                      final Path file, final Charset charset) throws IOException {
-            Objects.requireNonNull(callbackHandler, "callbackHandler must not be null");
-            Objects.requireNonNull(file, "file must not be null");
-            Objects.requireNonNull(charset, "charset must not be null");
-
-            final Reader reader = detectBomHeader
-                ? new BomInputStreamReader(Files.newInputStream(file), charset)
-                : new InputStreamReader(Files.newInputStream(file), charset);
-
-            return build(callbackHandler, reader);
+        public <T> CsvReader<T> build(final CsvCallbackHandler<T> callbackHandler, final Path file, final Charset charset) throws IOException {
+            throw new UnsupportedOperationException("STUB: not implemented");
         }
 
         private boolean isRelaxedConfiguration() {
-            final boolean relaxed = isForceRelaxedParser()
-                || fieldSeparator.length() > 1 || trimWhitespacesAroundQuotes;
+            final boolean relaxed = isForceRelaxedParser() || fieldSeparator.length() > 1 || trimWhitespacesAroundQuotes;
             if (relaxed && allowExtraCharsAfterClosingQuote) {
                 throw new IllegalStateException("allowExtraCharsAfterClosingQuote is not supported in relaxed mode");
             }
@@ -1099,28 +949,12 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
         }
 
         private <T> CsvReader<T> newReader(final CsvCallbackHandler<T> callbackHandler, final CsvParser csvParser) {
-            return new CsvReader<>(csvParser, callbackHandler,
-                commentStrategy, skipEmptyLines, extraFieldStrategy, missingFieldStrategy);
+            return new CsvReader<>(csvParser, callbackHandler, commentStrategy, skipEmptyLines, extraFieldStrategy, missingFieldStrategy);
         }
 
         @Override
         public String toString() {
-            return new StringJoiner(", ", CsvReaderBuilder.class.getSimpleName() + "[", "]")
-                .add("fieldSeparator=" + fieldSeparator)
-                .add("quoteCharacter=" + quoteCharacter)
-                .add("commentStrategy=" + commentStrategy)
-                .add("commentCharacter=" + commentCharacter)
-                .add("skipEmptyLines=" + skipEmptyLines)
-                .add("extraFieldStrategy=" + extraFieldStrategy)
-                .add("missingFieldStrategy=" + missingFieldStrategy)
-                .add("allowExtraCharsAfterClosingQuote=" + allowExtraCharsAfterClosingQuote)
-                .add("allowUnclosedQuote=" + allowUnclosedQuote)
-                .add("trimWhitespacesAroundQuotes=" + trimWhitespacesAroundQuotes)
-                .add("detectBomHeader=" + detectBomHeader)
-                .add("maxBufferSize=" + maxBufferSize)
-                .toString();
+            throw new UnsupportedOperationException("STUB: not implemented");
         }
-
     }
-
 }

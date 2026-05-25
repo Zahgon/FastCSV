@@ -15,8 +15,7 @@ import java.util.function.Consumer;
 /// This implementation is stateful and must not be reused.
 public final class StringArrayHandler extends AbstractInternalCsvCallbackHandler<String[]> {
 
-    private StringArrayHandler(final int maxFields, final int maxFieldSize, final int maxRecordSize,
-                               final FieldModifier fieldModifier) {
+    private StringArrayHandler(final int maxFields, final int maxFieldSize, final int maxRecordSize, final FieldModifier fieldModifier) {
         super(maxFields, maxFieldSize, maxRecordSize, fieldModifier);
     }
 
@@ -25,7 +24,7 @@ public final class StringArrayHandler extends AbstractInternalCsvCallbackHandler
     /// @return the builder
     /// @see #of(Consumer)
     public static StringArrayHandlerBuilder builder() {
-        return new StringArrayHandlerBuilder();
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
     /// Constructs a new instance of this class with default settings.
@@ -33,7 +32,7 @@ public final class StringArrayHandler extends AbstractInternalCsvCallbackHandler
     /// @return the new instance
     /// @see StringArrayHandlerBuilder#build()
     public static StringArrayHandler of() {
-        return builder().build();
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
     /// Constructs a new instance of this class with the given configuration.
@@ -46,27 +45,23 @@ public final class StringArrayHandler extends AbstractInternalCsvCallbackHandler
     /// @throws IllegalArgumentException if argument constraints are violated
     /// @see #builder()
     public static StringArrayHandler of(final Consumer<StringArrayHandlerBuilder> configurer) {
-        Objects.requireNonNull(configurer, "configurer must not be null");
-        final StringArrayHandlerBuilder builder = builder();
-        configurer.accept(builder);
-        return builder.build();
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
     @Override
     protected String[] buildRecord() {
-        return compactFields();
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
     /// A builder for [StringArrayHandler].
-    public static final class StringArrayHandlerBuilder
-        extends AbstractInternalCsvCallbackHandlerBuilder<StringArrayHandlerBuilder> {
+    public static final class StringArrayHandlerBuilder extends AbstractInternalCsvCallbackHandlerBuilder<StringArrayHandlerBuilder> {
 
         private StringArrayHandlerBuilder() {
         }
 
         @Override
         protected StringArrayHandlerBuilder self() {
-            return this;
+            throw new UnsupportedOperationException("STUB: not implemented");
         }
 
         /// Builds the [StringArrayHandler] instance.
@@ -75,9 +70,7 @@ public final class StringArrayHandler extends AbstractInternalCsvCallbackHandler
         /// @throws IllegalArgumentException if argument constraints are violated
         ///     (see [AbstractInternalCsvCallbackHandler])
         public StringArrayHandler build() {
-            return new StringArrayHandler(maxFields, maxFieldSize, maxRecordSize, fieldModifier);
+            throw new UnsupportedOperationException("STUB: not implemented");
         }
-
     }
-
 }

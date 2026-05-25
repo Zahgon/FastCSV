@@ -17,9 +17,6 @@ final class UnbufferedWriter extends FilterWriter implements Writable {
 
     @Override
     public void endRecord() throws IOException {
-        if (autoFlushWriter) {
-            flush();
-        }
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
-
 }

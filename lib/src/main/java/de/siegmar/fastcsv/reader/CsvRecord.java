@@ -37,8 +37,7 @@ public class CsvRecord {
     @SuppressWarnings("checkstyle:VisibilityModifier")
     final boolean comment;
 
-    CsvRecord(final long startingLineNumber, final String[] fields,
-              final boolean comment) {
+    CsvRecord(final long startingLineNumber, final String[] fields, final boolean comment) {
         this.startingLineNumber = startingLineNumber;
         this.fields = fields;
         this.comment = comment;
@@ -71,7 +70,7 @@ public class CsvRecord {
     ///
     /// @return the starting line number of this record, starting from 1
     public long getStartingLineNumber() {
-        return startingLineNumber;
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
     /// Retrieves the value of a field based on its index, with indexing starting from 0.
@@ -85,7 +84,7 @@ public class CsvRecord {
     /// @return field value, never `null`
     /// @throws IndexOutOfBoundsException if the index is out of range
     public String getField(final int index) {
-        return fields[index];
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
     /// Retrieves all fields of this record as an unmodifiable list.
@@ -95,8 +94,7 @@ public class CsvRecord {
     ///
     /// @return all fields of this record, never `null`
     public List<String> getFields() {
-        // Not using List.of() here for performance reasons, as it copies the array.
-        return Collections.unmodifiableList(Arrays.asList(fields));
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
     /// Gets the count of fields in this record.
@@ -107,7 +105,7 @@ public class CsvRecord {
     /// @see CsvReader.CsvReaderBuilder#extraFieldStrategy(FieldMismatchStrategy)
     /// @see CsvReader.CsvReaderBuilder#missingFieldStrategy(FieldMismatchStrategy)
     public int getFieldCount() {
-        return fields.length;
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
     /// Indicates whether the record is a commented record.
@@ -117,16 +115,11 @@ public class CsvRecord {
     /// @return `true` if the record is a commented record
     /// @see CsvReader.CsvReaderBuilder#commentStrategy(CommentStrategy)
     public boolean isComment() {
-        return comment;
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
     @Override
     public String toString() {
-        return new StringJoiner(", ", CsvRecord.class.getSimpleName() + "[", "]")
-            .add("startingLineNumber=" + startingLineNumber)
-            .add("fields=" + Arrays.toString(fields))
-            .add("comment=" + comment)
-            .toString();
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
-
 }

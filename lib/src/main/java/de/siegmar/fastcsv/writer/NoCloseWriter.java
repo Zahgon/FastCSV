@@ -12,7 +12,6 @@ class NoCloseWriter extends FilterWriter {
 
     @Override
     public void close() {
-        // do nothing
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
-
 }

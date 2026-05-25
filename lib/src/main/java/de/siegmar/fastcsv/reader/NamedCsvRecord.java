@@ -24,8 +24,7 @@ public final class NamedCsvRecord extends CsvRecord {
     private final String[] header;
 
     @SuppressWarnings("PMD.UseVarargs")
-    NamedCsvRecord(final long startingLineNumber, final String[] fields, final boolean comment,
-                   final String[] header) {
+    NamedCsvRecord(final long startingLineNumber, final String[] fields, final boolean comment, final String[] header) {
         super(startingLineNumber, fields, comment);
         this.header = header;
     }
@@ -42,8 +41,7 @@ public final class NamedCsvRecord extends CsvRecord {
     ///
     /// @return the header names, never `null`
     public List<String> getHeader() {
-        // Not using List.of() here for performance reasons, as it copies the array.
-        return Collections.unmodifiableList(Arrays.asList(header));
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
     /// Retrieves the value of a field by its case-sensitive name, considering the first occurrence in case of
@@ -59,20 +57,7 @@ public final class NamedCsvRecord extends CsvRecord {
     /// @see #findField(String)
     /// @see #findFields(String)
     public String getField(final String name) {
-        final int fieldIdx = findHeaderIndex(name);
-
-        // Check if the field index is valid
-        if (fieldIdx == -1) {
-            throw new NoSuchElementException("Header does not contain a field '%s'. Valid names are: %s"
-                .formatted(name, Arrays.toString(header)));
-        }
-        if (fieldIdx >= fields.length) {
-            throw new NoSuchElementException("Field '%s' is on index %d, but current record only contains %d fields"
-                .formatted(name, fieldIdx, fields.length));
-        }
-
-        // Return the value of the field
-        return fields[fieldIdx];
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
     // Finds the index for the first occurrence of the given header name (case-sensitive); returns -1 if not found
@@ -96,15 +81,7 @@ public final class NamedCsvRecord extends CsvRecord {
     /// @throws NullPointerException if name is `null`
     /// @see #findFields(String)
     public Optional<String> findField(final String name) {
-        final int fieldIdx = findHeaderIndex(name);
-
-        // Check if the field index is valid
-        if (fieldIdx == -1 || fieldIdx >= fields.length) {
-            return Optional.empty();
-        }
-
-        // Return the value of the field wrapped in an Optional
-        return Optional.of(fields[fieldIdx]);
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
     /// Collects all field values with the given name (case-sensitive) in the order they appear in the header.
@@ -113,14 +90,7 @@ public final class NamedCsvRecord extends CsvRecord {
     /// @return the field values (empty list if record doesn't contain that field), never `null`
     /// @throws NullPointerException if name is `null`
     public List<String> findFields(final String name) {
-        final int bound = header.length;
-        final List<String> ret = new ArrayList<>(bound);
-        for (int i = 0; i < bound; i++) {
-            if (name.equals(header[i])) {
-                ret.add(fields[i]);
-            }
-        }
-        return ret;
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
     /// Constructs an ordered map, associating header names with corresponding field values of this record,
@@ -135,12 +105,7 @@ public final class NamedCsvRecord extends CsvRecord {
     /// @see #getFieldsAsMapList()
     @SuppressWarnings("PMD.UseConcurrentHashMap")
     public Map<String, String> getFieldsAsMap() {
-        final int bound = commonSize();
-        final Map<String, String> map = new LinkedHashMap<>(bound);
-        for (int i = 0; i < bound; i++) {
-            map.putIfAbsent(header[i], fields[i]);
-        }
-        return map;
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
     /// Constructs an unordered map, associating header names with an ordered list of corresponding field values in
@@ -153,20 +118,9 @@ public final class NamedCsvRecord extends CsvRecord {
     ///
     /// @return an unordered map of header names and field values of this record, never `null`
     /// @see #getFieldsAsMap()
-    @SuppressWarnings({"PMD.AvoidInstantiatingObjectsInLoops", "PMD.UseConcurrentHashMap"})
+    @SuppressWarnings({ "PMD.AvoidInstantiatingObjectsInLoops", "PMD.UseConcurrentHashMap" })
     public Map<String, List<String>> getFieldsAsMapList() {
-        final int bound = commonSize();
-        final Map<String, List<String>> map = new HashMap<>(bound);
-        for (int i = 0; i < bound; i++) {
-            final String key = header[i];
-            List<String> val = map.get(key);
-            if (val == null) {
-                val = new ArrayList<>();
-                map.put(key, val);
-            }
-            val.add(fields[i]);
-        }
-        return map;
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
     // Mappings will only be created for fields that have a key and a value – return the minimum of both sizes
@@ -176,12 +130,6 @@ public final class NamedCsvRecord extends CsvRecord {
 
     @Override
     public String toString() {
-        return new StringJoiner(", ", NamedCsvRecord.class.getSimpleName() + "[", "]")
-            .add("startingLineNumber=" + startingLineNumber)
-            .add("fields=" + Arrays.toString(fields))
-            .add("comment=" + comment)
-            .add("header=" + Arrays.toString(header))
-            .toString();
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
-
 }

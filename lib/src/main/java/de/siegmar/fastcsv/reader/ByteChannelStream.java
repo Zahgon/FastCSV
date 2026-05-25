@@ -8,9 +8,13 @@ import java.nio.channels.ReadableByteChannel;
 final class ByteChannelStream {
 
     private final ByteBuffer byteBuf = ByteBuffer.allocateDirect(8192);
+
     private final ReadableByteChannel channel;
+
     private final CsvScanner.CsvListener csvListener;
+
     private long offset = -1;
+
     private int nextByte;
 
     // Keep one buf as Buffer to maintain Android compatibility
@@ -18,41 +22,26 @@ final class ByteChannelStream {
     // see https://www.morling.dev/blog/bytebuffer-and-the-dreaded-nosuchmethoderror/
     private final Buffer buf = byteBuf;
 
-    ByteChannelStream(final ReadableByteChannel channel, final CsvScanner.CsvListener csvListener)
-        throws IOException {
-
+    ByteChannelStream(final ReadableByteChannel channel, final CsvScanner.CsvListener csvListener) throws IOException {
         this.channel = channel;
         this.csvListener = csvListener;
         nextByte = loadData() ? (char) byteBuf.get() : -1;
     }
 
     int get() throws IOException {
-        if (nextByte == -1) {
-            return -1;
-        }
-
-        final int ret = nextByte;
-        nextByte = fetchNextByte();
-        offset++;
-        return ret;
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
     boolean consumeIfNextEq(final int val) throws IOException {
-        if (nextByte != val) {
-            return false;
-        }
-
-        nextByte = fetchNextByte();
-        offset++;
-        return true;
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
     boolean hasData() {
-        return nextByte != -1;
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
     long getOffset() {
-        return offset;
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
     private int fetchNextByte() throws IOException {
@@ -63,13 +52,10 @@ final class ByteChannelStream {
         buf.clear();
         final int readCnt = channel.read(byteBuf);
         buf.flip();
-
         if (readCnt != -1) {
             csvListener.onReadBytes(readCnt);
             return true;
         }
-
         return false;
     }
-
 }

@@ -98,6 +98,6 @@ public abstract class CsvCallbackHandler<T> {
 
     /// Called at the end of the CSV reading process.
     protected void terminate() {
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
-
 }

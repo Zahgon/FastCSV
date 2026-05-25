@@ -2,32 +2,30 @@ package de.siegmar.fastcsv.reader;
 
 import static de.siegmar.fastcsv.util.Util.CR;
 import static de.siegmar.fastcsv.util.Util.LF;
-
 import java.io.IOException;
 import java.nio.channels.ReadableByteChannel;
 
 final class CsvScanner {
 
     private final byte fieldSeparator;
+
     private final byte quoteCharacter;
+
     private final byte commentCharacter;
+
     private final CsvListener csvListener;
+
     private final ByteChannelStream stream;
+
     private final boolean readComments;
 
-    CsvScanner(final ReadableByteChannel channel, final int bomHeaderLength, final byte fieldSeparator,
-               final byte quoteCharacter, final CommentStrategy commentStrategy, final byte commentCharacter,
-               final CsvListener csvListener) throws IOException {
-
+    CsvScanner(final ReadableByteChannel channel, final int bomHeaderLength, final byte fieldSeparator, final byte quoteCharacter, final CommentStrategy commentStrategy, final byte commentCharacter, final CsvListener csvListener) throws IOException {
         this.fieldSeparator = fieldSeparator;
         this.quoteCharacter = quoteCharacter;
         this.commentCharacter = commentCharacter;
         this.csvListener = csvListener;
-
         readComments = commentStrategy != CommentStrategy.NONE;
-
         stream = new ByteChannelStream(channel, csvListener);
-
         if (bomHeaderLength > 0) {
             for (int i = 0; i < bomHeaderLength; i++) {
                 stream.get();
@@ -35,26 +33,12 @@ final class CsvScanner {
         }
     }
 
-    @SuppressWarnings({"PMD.AssignmentInOperand", "checkstyle:CyclomaticComplexity",
-        "checkstyle:NestedIfDepth"})
+    @SuppressWarnings({ "PMD.AssignmentInOperand", "checkstyle:CyclomaticComplexity", "checkstyle:NestedIfDepth" })
     void scan() throws IOException {
-        int d;
-        while ((d = stream.get()) != -1) {
-            csvListener.startOffset(stream.getOffset());
-
-            // parse a record
-            if (d == commentCharacter && readComments) {
-                consumeCommentedLine();
-            } else {
-                consumeRecord(d);
-            }
-
-            csvListener.onReadRecord();
-        }
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    @SuppressWarnings({"PMD.AvoidReassigningParameters", "checkstyle:FinalParameters",
-        "checkstyle:ParameterAssignment"})
+    @SuppressWarnings({ "PMD.AvoidReassigningParameters", "checkstyle:FinalParameters", "checkstyle:ParameterAssignment" })
     private void consumeRecord(int d) throws IOException {
         do {
             // parse fields
@@ -85,13 +69,11 @@ final class CsvScanner {
                 csvListener.additionalLine();
             }
         }
-
         // handle all kinds of characters after closing quote
         return stream.hasData() && consumeUnquotedField(stream.get());
     }
 
-    @SuppressWarnings({"PMD.AvoidReassigningParameters", "checkstyle:FinalParameters",
-        "checkstyle:ParameterAssignment"})
+    @SuppressWarnings({ "PMD.AvoidReassigningParameters", "checkstyle:FinalParameters", "checkstyle:ParameterAssignment" })
     private boolean consumeUnquotedField(int d) throws IOException {
         do {
             if (d == fieldSeparator) {
@@ -103,7 +85,6 @@ final class CsvScanner {
                 break;
             }
         } while ((d = stream.get()) != -1);
-
         return true;
     }
 
@@ -129,7 +110,5 @@ final class CsvScanner {
         void onReadRecord();
 
         void additionalLine();
-
     }
-
 }

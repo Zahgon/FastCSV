@@ -5,13 +5,10 @@ public enum LineDelimiter {
 
     /// Line Feed - (UNIX).
     LF("\n"),
-
     /// Carriage Return - (Mac classic).
     CR("\r"),
-
     /// Carriage Return and Line Feed (Windows).
     CRLF("\r\n"),
-
     /// Use current platform default ([System#lineSeparator()].
     PLATFORM(System.lineSeparator());
 
@@ -30,17 +27,11 @@ public enum LineDelimiter {
     /// @return the matching enum constant.
     /// @throws IllegalArgumentException if the string is not a known line delimiter.
     public static LineDelimiter of(final String str) {
-        return switch (str) {
-            case "\r\n" -> CRLF;
-            case "\n" -> LF;
-            case "\r" -> CR;
-            default -> throw new IllegalArgumentException("Unknown line delimiter: " + str);
-        };
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
     @Override
     public String toString() {
-        return str;
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
-
 }

@@ -14,17 +14,16 @@ class RandomAccessFileInputStream extends InputStream {
 
     @Override
     public int read() {
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
     @Override
     public int read(final byte[] b, final int off, final int len) throws IOException {
-        return raf.read(b, off, len);
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
     @Override
     public void close() throws IOException {
-        raf.close();
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
-
 }

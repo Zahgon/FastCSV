@@ -1,14 +1,12 @@
 package de.siegmar.fastcsv.reader;
 
 import java.util.Objects;
-
 import de.siegmar.fastcsv.util.Preconditions;
 
 /// Abstract base class for [CsvCallbackHandler] implementations.
 ///
 /// @param <T> the type of the resulting records
-public abstract sealed class AbstractInternalCsvCallbackHandler<T> extends CsvCallbackHandler<T>
-    permits CsvRecordHandler, NamedCsvRecordHandler, StringArrayHandler {
+public abstract sealed class AbstractInternalCsvCallbackHandler<T> extends CsvCallbackHandler<T> permits CsvRecordHandler, NamedCsvRecordHandler, StringArrayHandler {
 
     private static final int DEFAULT_INITIAL_FIELDS_SIZE = 32;
 
@@ -49,13 +47,8 @@ public abstract sealed class AbstractInternalCsvCallbackHandler<T> extends CsvCa
     /// @param fieldModifier the field modifier; must not be `null`
     /// @throws IllegalArgumentException if the arguments are invalid
     /// @throws NullPointerException     if `null` is passed
-    protected AbstractInternalCsvCallbackHandler(final int maxFields,
-                                                 final int maxFieldSize,
-                                                 final int maxRecordSize,
-                                                 final FieldModifier fieldModifier) {
-
+    protected AbstractInternalCsvCallbackHandler(final int maxFields, final int maxFieldSize, final int maxRecordSize, final FieldModifier fieldModifier) {
         Preconditions.checkArgument(maxRecordSize >= maxFieldSize, "maxRecordSize must be >= maxFieldSize");
-
         this.maxFields = maxFields;
         this.maxFieldSize = maxFieldSize;
         this.maxRecordSize = maxRecordSize;
@@ -65,12 +58,12 @@ public abstract sealed class AbstractInternalCsvCallbackHandler<T> extends CsvCa
 
     @Override
     public RecordType getRecordType() {
-        return recordType;
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
     @Override
     protected int getFieldCount() {
-        return fieldIdx;
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
     /// {@inheritDoc}
@@ -78,10 +71,7 @@ public abstract sealed class AbstractInternalCsvCallbackHandler<T> extends CsvCa
     @SuppressWarnings("checkstyle:HiddenField")
     @Override
     protected void beginRecord(final long startingLineNumber) {
-        this.startingLineNumber = startingLineNumber;
-        fieldIdx = 0;
-        recordSize = 0;
-        recordType = RecordType.DATA;
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
     /// {@inheritDoc}
@@ -90,22 +80,7 @@ public abstract sealed class AbstractInternalCsvCallbackHandler<T> extends CsvCa
     /// @throws CsvParseException if the addition exceeds the limit of record size or maximum fields count.
     @Override
     protected void addField(final char[] buf, final int offset, final int len, final boolean quoted) {
-        final String modifiedField = modifyField(new String(buf, offset, len), quoted);
-        final int modifiedFieldLength = modifiedField.length();
-
-        if (maxFieldSize < modifiedFieldLength) {
-            throw new CsvParseException(maxFieldSizeExceededMessage());
-        }
-        if (maxRecordSize < recordSize + modifiedFieldLength) {
-            throw new CsvParseException(maxRecordSizeExceededMessage());
-        }
-
-        if (fieldIdx == fields.length) {
-            extendCapacity();
-        }
-
-        fields[fieldIdx++] = modifiedField;
-        recordSize += modifiedFieldLength;
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
     /// Modifies field value.
@@ -114,17 +89,15 @@ public abstract sealed class AbstractInternalCsvCallbackHandler<T> extends CsvCa
     /// @param quoted `true` if the field was quoted
     /// @return the modified field value
     protected String modifyField(final String value, final boolean quoted) {
-        return fieldModifier.modify(startingLineNumber, fieldIdx, quoted, value);
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
     private String maxFieldSizeExceededMessage() {
-        return "Field at index %d in record starting at line %d exceeds the max field size of %d characters"
-            .formatted(fieldIdx, startingLineNumber, maxFieldSize);
+        return "Field at index %d in record starting at line %d exceeds the max field size of %d characters".formatted(fieldIdx, startingLineNumber, maxFieldSize);
     }
 
     private String maxRecordSizeExceededMessage() {
-        return "Field at index %d in record starting at line %d exceeds the max record size of %d characters"
-            .formatted(fieldIdx, startingLineNumber, maxRecordSize);
+        return "Field at index %d in record starting at line %d exceeds the max record size of %d characters".formatted(fieldIdx, startingLineNumber, maxRecordSize);
     }
 
     /// {@inheritDoc}
@@ -133,20 +106,7 @@ public abstract sealed class AbstractInternalCsvCallbackHandler<T> extends CsvCa
     /// @throws CsvParseException if the addition exceeds the limit of record size.
     @Override
     protected void setComment(final char[] buf, final int offset, final int len) {
-        recordType = RecordType.COMMENT;
-
-        final String modifiedComment = modifyComment(new String(buf, offset, len));
-        final int modifiedCommentLength = modifiedComment.length();
-        if (maxFieldSize < modifiedCommentLength) {
-            throw new CsvParseException(maxFieldSizeExceededMessage());
-        }
-
-        // No need to check maxRecordSize here since maxRecordSize >= maxFieldSize and
-        // comments are one-field records
-
-        recordSize += modifiedCommentLength;
-        fields[0] = modifiedComment;
-        fieldIdx = 1;
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
     /// Modifies comment value.
@@ -154,20 +114,17 @@ public abstract sealed class AbstractInternalCsvCallbackHandler<T> extends CsvCa
     /// @param field the comment value
     /// @return the modified comment value
     protected String modifyComment(final String field) {
-        return fieldModifier.modifyComment(startingLineNumber, field);
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
     @Override
     protected void setEmpty() {
-        recordType = RecordType.EMPTY;
-        fields[0] = "";
-        fieldIdx = 1;
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
     private void extendCapacity() {
         if (fields.length == maxFields) {
-            throw new CsvParseException("Record starting at line %d has surpassed the maximum limit of %d fields"
-                .formatted(startingLineNumber, maxFields));
+            throw new CsvParseException("Record starting at line %d has surpassed the maximum limit of %d fields".formatted(startingLineNumber, maxFields));
         }
         final String[] newFields = new String[Math.min(maxFields, fields.length * 2)];
         System.arraycopy(fields, 0, newFields, 0, fieldIdx);
@@ -181,9 +138,7 @@ public abstract sealed class AbstractInternalCsvCallbackHandler<T> extends CsvCa
     ///
     /// @return the compact fields array
     protected String[] compactFields() {
-        final String[] ret = new String[fieldIdx];
-        System.arraycopy(fields, 0, ret, 0, fieldIdx);
-        return ret;
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
     /// Abstract builder for [AbstractInternalCsvCallbackHandler] subclasses.
@@ -200,11 +155,12 @@ public abstract sealed class AbstractInternalCsvCallbackHandler<T> extends CsvCa
     ///
     /// @param <T> the type of the actual builder
     @SuppressWarnings("PMD.AvoidFieldNameMatchingMethodName")
-    public abstract static class AbstractInternalCsvCallbackHandlerBuilder
-        <T extends AbstractInternalCsvCallbackHandlerBuilder<?>> {
+    public abstract static class AbstractInternalCsvCallbackHandlerBuilder<T extends AbstractInternalCsvCallbackHandlerBuilder<?>> {
 
         private static final int DEFAULT_MAX_FIELDS = 16 * 1024;
+
         private static final int DEFAULT_MAX_FIELD_SIZE = 16 * 1024 * 1024;
+
         private static final int DEFAULT_MAX_RECORD_SIZE = 4 * DEFAULT_MAX_FIELD_SIZE;
 
         /// The maximum number of fields a single record may have.
@@ -242,9 +198,7 @@ public abstract sealed class AbstractInternalCsvCallbackHandler<T> extends CsvCa
         /// @throws IllegalArgumentException if the argument is less than 1
         @SuppressWarnings("checkstyle:HiddenField")
         public T maxFields(final int maxFields) {
-            Preconditions.checkArgument(maxFields > 0, "maxFields must be > 0");
-            this.maxFields = maxFields;
-            return self();
+            throw new UnsupportedOperationException("STUB: not implemented");
         }
 
         /// Defines the maximum number of characters a single field may have.
@@ -263,9 +217,7 @@ public abstract sealed class AbstractInternalCsvCallbackHandler<T> extends CsvCa
         /// @see de.siegmar.fastcsv.reader.CsvReader.CsvReaderBuilder#maxBufferSize(int)
         @SuppressWarnings("checkstyle:HiddenField")
         public T maxFieldSize(final int maxFieldSize) {
-            Preconditions.checkArgument(maxFieldSize > 0, "maxFieldSize must be > 0");
-            this.maxFieldSize = maxFieldSize;
-            return self();
+            throw new UnsupportedOperationException("STUB: not implemented");
         }
 
         /// Defines the maximum number of characters a single record may have.
@@ -283,9 +235,7 @@ public abstract sealed class AbstractInternalCsvCallbackHandler<T> extends CsvCa
         /// @see #maxFieldSize(int)
         @SuppressWarnings("checkstyle:HiddenField")
         public T maxRecordSize(final int maxRecordSize) {
-            Preconditions.checkArgument(maxRecordSize > 0, "maxRecordSize must be > 0");
-            this.maxRecordSize = maxRecordSize;
-            return self();
+            throw new UnsupportedOperationException("STUB: not implemented");
         }
 
         /// Sets the field modifier.
@@ -295,11 +245,7 @@ public abstract sealed class AbstractInternalCsvCallbackHandler<T> extends CsvCa
         /// @throws NullPointerException if `null` is passed
         @SuppressWarnings("checkstyle:HiddenField")
         public T fieldModifier(final FieldModifier fieldModifier) {
-            Objects.requireNonNull(fieldModifier, "fieldModifier must not be null");
-            this.fieldModifier = fieldModifier;
-            return self();
+            throw new UnsupportedOperationException("STUB: not implemented");
         }
-
     }
-
 }

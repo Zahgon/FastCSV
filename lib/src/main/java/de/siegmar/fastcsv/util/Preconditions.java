@@ -16,9 +16,7 @@ public final class Preconditions {
     /// @param errorMessage the exception message to be thrown
     /// @throws IllegalArgumentException if the `expression` is `false`.
     public static void checkArgument(final boolean expression, final String errorMessage) {
-        if (!expression) {
-            throw new IllegalArgumentException(errorMessage);
-        }
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
     /// Checks the given argument and throws an exception if not met.
@@ -28,9 +26,6 @@ public final class Preconditions {
     /// @throws IllegalArgumentException if the `expression` is `false`.
     @SuppressWarnings("AnnotateFormatMethod")
     public static void checkArgument(final boolean expression, final Supplier<String> errorMessageSupplier) {
-        if (!expression) {
-            throw new IllegalArgumentException(errorMessageSupplier.get());
-        }
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
-
 }

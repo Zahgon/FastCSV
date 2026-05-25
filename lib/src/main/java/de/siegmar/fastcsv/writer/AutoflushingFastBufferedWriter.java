@@ -11,7 +11,6 @@ final class AutoflushingFastBufferedWriter extends FastBufferedWriter {
 
     @Override
     public void endRecord() throws IOException {
-        flush();
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
-
 }

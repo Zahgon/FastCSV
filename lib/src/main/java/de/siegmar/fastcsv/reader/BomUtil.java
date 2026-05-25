@@ -31,47 +31,9 @@ final class BomUtil {
     /// @param buf the byte array to detect the character encoding from
     /// @return an Optional containing the detected BomHeader if a BOM header is found,
     ///     or an empty Optional if no BOM header is found
-    @SuppressWarnings({
-        "checkstyle:CyclomaticComplexity",
-        "checkstyle:BooleanExpressionComplexity",
-        "checkstyle:NestedIfDepth",
-        "checkstyle:ReturnCount",
-        "PMD.AvoidLiteralsInIfCondition"
-    })
+    @SuppressWarnings({ "checkstyle:CyclomaticComplexity", "checkstyle:BooleanExpressionComplexity", "checkstyle:NestedIfDepth", "checkstyle:ReturnCount", "PMD.AvoidLiteralsInIfCondition" })
     static Optional<BomHeader> detectCharset(final byte[] buf) {
-        final int n = buf.length;
-
-        if (n < 2) {
-            // Not enough bytes to be a BOM header
-            return Optional.empty();
-        }
-
-        if (buf[0] == (byte) 0xEF) {
-            if (n > 2 && buf[1] == (byte) 0xBB && buf[2] == (byte) 0xBF) {
-                return Optional.of(BomHeader.UTF_8);
-            }
-        } else if (buf[0] == (byte) 0xFE) {
-            if (buf[1] == (byte) 0xFF) {
-                return Optional.of(BomHeader.UTF_16_BE);
-            }
-        } else if (buf[0] == (byte) 0xFF) {
-            if (buf[1] == (byte) 0xFE) {
-                if (n > 3 && buf[2] == (byte) 0x00 && buf[3] == (byte) 0x00) {
-                    return Optional.of(BomHeader.UTF_32_LE);
-                } else {
-                    return Optional.of(BomHeader.UTF_16_LE);
-                }
-            }
-        } else if (buf[0] == (byte) 0x00) {
-            if (n > 3
-                && buf[1] == (byte) 0x00
-                && buf[2] == (byte) 0xFE
-                && buf[3] == (byte) 0xFF) {
-                return Optional.of(BomHeader.UTF_32_BE);
-            }
-        }
-
-        return Optional.empty();
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
     /// Detects the character encoding of a file based on the presence of a Byte Order Mark (BOM) header.
@@ -80,11 +42,7 @@ final class BomUtil {
     /// @return an [Optional] containing the detected [BomHeader] if a BOM header is found,
     ///     or [Optional#EMPTY] if no BOM header is found
     /// @throws IOException if an I/O error occurs reading the file
-    static Optional<BomHeader> detectCharset(final Path file)
-        throws IOException {
-        try (var in = Files.newInputStream(file, StandardOpenOption.READ)) {
-            return detectCharset(in.readNBytes(POTENTIAL_BOM_SIZE));
-        }
+    static Optional<BomHeader> detectCharset(final Path file) throws IOException {
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
-
 }

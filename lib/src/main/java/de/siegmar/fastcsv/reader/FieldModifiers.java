@@ -18,24 +18,23 @@ public enum FieldModifiers implements FieldModifier {
 
     /// Modifier that does not modify anything.
     NOP,
-
     /// Modifier that modifies the field value with [String#trim()].
     /// Comments are not modified.
     TRIM {
-        @Override
-        public String modify(final long startingLineNumber, final int fieldIdx,
-                             final boolean quoted, final String field) {
-            return field.trim();
-        }
-    },
 
+        @Override
+        public String modify(final long startingLineNumber, final int fieldIdx, final boolean quoted, final String field) {
+            throw new UnsupportedOperationException("STUB: not implemented");
+        }
+    }
+    ,
     /// Modifier that modifies the field value with [String#strip()].
     /// Comments are not modified.
     STRIP {
+
         @Override
-        public String modify(final long startingLineNumber, final int fieldIdx,
-                             final boolean quoted, final String field) {
-            return field.strip();
+        public String modify(final long startingLineNumber, final int fieldIdx, final boolean quoted, final String field) {
+            throw new UnsupportedOperationException("STUB: not implemented");
         }
     }
 
